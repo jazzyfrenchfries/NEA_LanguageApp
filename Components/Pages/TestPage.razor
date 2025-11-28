@@ -1,0 +1,18 @@
+@page "/testmodal"
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@inject IModalService ModalService
+
+<h3>Test Modal</h3>
+
+<button @onclick="OpenModal">Open Modal</button>
+
+@code {
+    private void OpenModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Score", 123);
+
+        ModalService.Show<EndGameModal>("Game Over", parameters);
+    }
+}

@@ -1,0 +1,39 @@
+@page "/leaderboard"
+
+<PageTitle>Leaderboard</PageTitle>
+
+<h1>Welcome to the leaderboards </h1>
+
+<div class="modal-body">
+    <p>Insert Leaderboards here</p>
+    <button class="btn btn-secondary" @onclick="Listening">Listening Leaderboard</button>
+    <button class="btn btn-secondary" @onclick="Vocabulary">Vocabulary Leaderboard</button>
+    <button class="btn btn-secondary" @onclick="Conjugation">Conjugation Leaderboard</button>
+</div>
+@code {
+    [Inject]
+    private NavigationManager NavMan { get; set; } = default!;
+
+    private void Listening()
+    {
+        
+    }
+    private void Vocabulary()
+    {
+        
+    }
+    private void Conjugation()
+    {
+    }
+}
+<style>
+    .modal-body {
+        text-align: center;
+        display: flex;
+        flex-direction: column;   
+        justify-content: left;
+        align-items: center;      
+        gap: 1rem;                
+        margin-top: 1.5rem;
+    }
+</style>

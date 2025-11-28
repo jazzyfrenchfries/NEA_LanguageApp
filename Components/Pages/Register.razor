@@ -1,0 +1,15 @@
+@page "/register"
+@rendermode InteractiveServer
+@inject NavigationManager NavMenu
+<PageTitle>Login</PageTitle>
+<button type="button"@onclick="RegisterUser">Register</button>
+<button type="button" @onclick="Cancel">Cancel</button>
+
+@code{
+    private void RegisterUser(){
+
+    }
+    private void Cancel(){
+        NavMenu.NavigateTo("/");
+    }
+}

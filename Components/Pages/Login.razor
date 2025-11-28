@@ -1,0 +1,16 @@
+@page "/Login"
+@rendermode InteractiveServer
+@using NEA.Components.Layout
+@inject NavigationManager NavMenu
+<PageTitle>Login</PageTitle>
+<button type="button"@onclick="LoginUser">Login</button>
+<button type="button" @onclick="Cancel">Cancel</button>
+
+@code{
+    private void LoginUser(){
+
+    }
+    private void Cancel(){
+        NavMenu.NavigateTo("/");
+    }
+}

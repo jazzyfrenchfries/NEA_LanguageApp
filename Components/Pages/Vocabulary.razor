@@ -1,0 +1,214 @@
+@page "/vocabulary"
+@rendermode InteractiveServer
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@inject IModalService ModalService
+<PageTitle>Listening</PageTitle>
+
+
+@if (!isPlaying)
+{
+   
+        <h1>Vocabulary Game</h1>
+        <p>Test your vocabulary skills! Click the button below to start.</p>
+         <div class="centered-container">
+    <button class="start-button" @onclick="StartVocabulary">start</button>
+   </div>
+}
+else
+{
+    <div class="vocabulary-container">
+        <h1>Vocabulary</h1>
+        <p>Your score: @score</p>
+        <p> What is this in English? : [ insert listening info here ]</p>
+        <textarea @bind="userAnswer" placeholder="Type your answer here..." class="answer-box"></textarea>
+        <div class="centered-container">
+        <button Class="check-button" @onclick="CheckAnswer">Submit</button>
+        <button Class="end-button" @onclick="EndGame"> End</button>  
+        <button Class="hint-button" @onclick="UseHint">Hint</button>
+        </div>
+    </div>
+}
+
+@code {
+    bool isPlaying = false;
+    int score = 0;
+    string userAnswer = "";
+    
+
+    private void StartVocabulary()
+    {
+        isPlaying = true;
+    }
+
+    private void CheckAnswer()
+    {
+        if (!string.IsNullOrWhiteSpace(userAnswer))
+        {
+            score++;
+            userAnswer = "";
+        }
+    }
+     private void EndGame()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(EndGameModal.Score), score);
+
+        ModalService.Show<EndGameModal>("Game Over", parameters);
+    }
+
+
+    private void UseHint()
+    {
+        userAnswer = "Hint: ...";
+    }
+}
+
+<style>
+    /*Container*/
+   .vocabulary-container {
+    max-width: 1200px;
+    max-height: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px #00000014;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+}
+.centered-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    max-width: 1200px;
+    max-height: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px #00000014;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+}
+
+/* Header bar inside the card */
+.vocabulary-container h1 {
+    margin: -2rem -2rem 1.5rem -2rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #648f77, #648f77);
+    color: white;
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-align: left;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+/* Score */
+.vocabulary-container p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #000000;
+
+}
+/*End Game box */
+.final-score-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px #00000014;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+}
+/* Answer box */
+.answer-box {
+    width: 100%;
+    min-height: 100px;
+    margin-top: 1rem;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    background-color: #ffffff;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.answer-box:focus {
+    border-color: #ffffff;
+    box-shadow: 0 0 6px #0000004d;
+    outline: none;
+}
+
+/* Button group */
+
+.start-button {
+    border-color: #000000;
+    background-color: #648f77; /* greenish */
+    color: rgb(255, 255, 255);
+}
+
+.end-button {
+    border-color: #ffffff;
+    background-color: #b26970; /* redish */
+    color: rgb(255, 255, 255);
+}
+
+.check-button {
+    border-color: #ffffff;
+    background-color: #719a73;
+    color: rgb(0, 0, 0);
+}
+
+.hint-button {
+    border-color: #ffffff;
+    background-color: #719a73;
+    color: rgb(0, 0, 0);
+}
+
+/* Feedback */
+.feedback {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.correct {
+    color: #73a07e;
+}
+
+.incorrect {
+    color: #b26970;
+}
+
+/* Game over state */
+.final-score {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #000000;
+    margin-top: 1rem;
+}
+
+.end-message {
+    margin: 0.5rem 0 1.5rem;
+    font-size: 1.1rem;
+    color: #ff0000;
+}
+/* Blazored Modal Buttons */
+.blazored-modal-footer button {
+    border: 2px solid #000000 !important; 
+    border-radius: 8px;
+    background-color: #ffffff;           
+    color: #000000;                        
+    padding: 0.5rem 1rem;
+}
+
+.blazored-modal-footer button:hover {
+    border-color: #648f77;                 
+    box-shadow: 0 0 6px #0000004d;
+}
+
+</style>
