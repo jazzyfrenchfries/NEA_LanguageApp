@@ -16,23 +16,22 @@
 
 @code {
     [Parameter] public int Score { get; set; }
-
-    // Modern v10 API: modal instance
+    
     [CascadingParameter] public BlazoredModalInstance ModalInstance { get; set; } = default!;
 
     private async Task Redo()
     {
-        await ModalInstance.CloseAsync(); // closes modal asynchronously
+        await ModalInstance.CloseAsync(); 
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
     private async Task Home()
     {
-        await ModalInstance.CloseAsync(); // closes modal asynchronously
+        await ModalInstance.CloseAsync(); 
         NavigationManager.NavigateTo("/");
     }
     private async Task Account()
     {
-        await ModalInstance.CloseAsync(); // closes modal asynchronously
+        await ModalInstance.CloseAsync();
         NavigationManager.NavigateTo("/account");
     }
 }
