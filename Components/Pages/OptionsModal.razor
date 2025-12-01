@@ -1,28 +1,5 @@
 @inject Blazored.Modal.Services.IModalService ModalService
 @using Blazored.Modal
-@code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-
-    private string selectedList = "Default";
-    private List<string> vocabLists = new() { "Default", "CyberSociety", "Travel", "Business" };
-
-    private bool enableHints = true;
-
-    private void ApplyOptions()
-    {
-        // Pass options back to parent page
-        var result = new VocabOptions
-        {
-            SelectedList = selectedList,
-            EnableHints = enableHints
-        };
-        BlazoredModal.CloseAsync(ModalResult.Ok(result));
-        
-    }
-
-    private void Cancel() => BlazoredModal.CloseAsync(); 
-   
-}
 
 <div class="options-modal">
     <h2>Vocabulary Options</h2>
@@ -48,14 +25,52 @@
         <button class="end-button" @onclick="Cancel">Cancel</button>
     </div>
 </div>
-
 @code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    private string selectedList;
+    private List<string> vocabLists = new();
+    private bool enableHints = true;
+
+    protected override void OnInitialized()
+    {
+        string dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
+
+        if (Directory.Exists(dataPath))
+        {
+            vocabLists = Directory.GetFiles(dataPath, "*.json")
+                                  .Select(file => Path.GetFileNameWithoutExtension(file))
+                                  .ToList();
+
+            selectedList = vocabLists.FirstOrDefault(); // default selected
+        }
+        else
+        {
+            vocabLists.Add("No Lists Found");
+            selectedList = vocabLists[0];
+        }
+    }
+
+    private void ApplyOptions()
+    {
+        var result = new VocabOptions
+        {
+            SelectedList = selectedList,
+            EnableHints = enableHints
+        };
+
+        BlazoredModal.CloseAsync(ModalResult.Ok(result));
+    }
+
+    private void Cancel() => BlazoredModal.CancelAsync();
+
     public class VocabOptions
     {
         public string SelectedList { get; set; }
         public bool EnableHints { get; set; }
     }
 }
+
 <style>
 .options-modal {
     padding: 1.5rem;

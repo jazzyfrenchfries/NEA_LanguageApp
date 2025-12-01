@@ -25,6 +25,10 @@ else
         {
             <p>What is this in English? : <strong>@CurrentItem.Word</strong></p>
         }
+        @if (isHintUsed && !string.IsNullOrEmpty(hint))
+        {
+            <p>Hint: @hint</p>
+        }   
 
         <textarea 
             @bind="userAnswer" 
@@ -71,6 +75,7 @@ else
     bool isPlaying = false;
     int score = 0;
     string userAnswer;
+    string hint;
     private int currentkey ;
     private bool iscorrect;
     private bool hasSubmitted = false;
@@ -107,6 +112,7 @@ private VocabularyItem? GetRandomItem()
 
     isPlaying = true;
     userAnswer = "";
+    hint = string.Empty;
     currentkey = item.Key;
     iscorrect = false;
     hasSubmitted = false;
@@ -133,6 +139,7 @@ private VocabularyItem? GetRandomItem()
 
     }
 }
+
      private void EndGame(){
         var parameters = new ModalParameters();
         parameters.Add(nameof(EndGameModal.Score), score);
@@ -153,7 +160,7 @@ private VocabularyItem? GetRandomItem()
 }
     private void UseHint(){
         isHintUsed = true;
-        userAnswer = CurrentItem?.Hint ?? string.Empty;
+        hint = CurrentItem?.Hint ?? string.Empty;
     }
 
 private void LoadVocabList(string listName){
