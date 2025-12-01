@@ -81,6 +81,7 @@ else
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
     private string defaultVocabList = "VocabList_.cybersociety";
+    int totalCompleted = 0;
     private List<VocabularyItem> items = new();
      private VocabularyItem? CurrentItem => items.FirstOrDefault(i => i.Key == currentkey);
     private static readonly Random random = new();
@@ -136,7 +137,10 @@ private VocabularyItem? GetRandomItem()
     }
     else{
         iscorrect = false;
-
+        totalCompleted++;
+        if (totalCompleted >= items.Count){
+            EndGame();
+        }
     }
 }
 
