@@ -2,22 +2,16 @@
 @using Blazored.Modal
 
 <div class="options-modal">
-    <h2>Vocabulary Options</h2>
+    <h2>Conjugation Options</h2>
 
     <div class="option-group">
-        <label>Select Vocabulary List:</label>
+        <label>Select Conjugation List:</label>
         <select @bind="selectedList" class="options-select">
-            @foreach (var list in vocabLists)
+            @foreach (var list in conjugationLists)
             {
                 <option value="@list">@list</option>
             }
         </select>
-    </div>
-
-    <div class="option-group">
-        <label>
-            <input type="checkbox" @bind="enableHints" /> Enable Hints
-        </label>
     </div>
 
     <div class="options-buttons">
@@ -29,34 +23,33 @@
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
 
     private string selectedList;
-    private List<string> vocabLists = new();
-    private bool enableHints = true;
+    private List<string> conjugationLists = new();
+
 
     protected override void OnInitialized()
     {
-        string dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
+        string dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Conjugation");
 
         if (Directory.Exists(dataPath))
         {
-            vocabLists = Directory.GetFiles(dataPath, "*.json")
+            conjugationLists = Directory.GetFiles(dataPath, "*.json")
                                   .Select(file => Path.GetFileNameWithoutExtension(file))
                                   .ToList();
 
-            selectedList = vocabLists.FirstOrDefault(); // default selected
+            selectedList = conjugationLists.FirstOrDefault(); // default selected
         }
         else
         {
-            vocabLists.Add("No Lists Found");
-            selectedList = vocabLists[0];
+            conjugationLists.Add("No Lists Found");
+            selectedList = conjugationLists[0];
         }
     }
 
     private void ApplyOptions()
     {
-        var result = new VocabOptions
+        var result = new ConjugationOptions
         {
-            SelectedList = selectedList,
-            EnableHints = enableHints
+            SelectedList = selectedList
         };
 
         BlazoredModal.CloseAsync(ModalResult.Ok(result));
@@ -64,10 +57,9 @@
 
     private void Cancel() => BlazoredModal.CancelAsync();
 
-    public class VocabOptions
+    public class ConjugationOptions
     {
         public string SelectedList { get; set; }
-        public bool EnableHints { get; set; }
     }
 }
 
@@ -105,4 +97,9 @@
     justify-content: flex-end;
     gap: 0.5rem;
 }
+.modal-dialog {
+    position: relative;
+    top: 20vh; 
+}
+
 </style>

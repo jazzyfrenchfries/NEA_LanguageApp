@@ -80,7 +80,7 @@ else
     private bool iscorrect;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
-    private string defaultVocabList = "VocabList_.cybersociety";
+    private string defaultVocabList = "AllVocab";
     int totalCompleted = 0;
     private List<VocabularyItem> items = new();
      private VocabularyItem? CurrentItem => items.FirstOrDefault(i => i.Key == currentkey);
@@ -106,10 +106,6 @@ private VocabularyItem? GetRandomItem()
    private void StartVocabulary()
 {
     var item = GetRandomItem();
-    if (item == null)
-    {
-        return;
-    }
 
     isPlaying = true;
     userAnswer = "";
@@ -152,14 +148,13 @@ private VocabularyItem? GetRandomItem()
     }
     private async Task GameOptions()
 {
-    var modal = ModalService.Show<OptionsModal>("Game Options");
+    var modal = ModalService.Show<OptionsModalVocab>("Game Options");
     var result = await modal.Result;
 
     if (!result.Cancelled)
     {
-        var options = (OptionsModal.VocabOptions)result.Data;
+        var options = (OptionsModalVocab.VocabOptions)result.Data;
         LoadVocabList(options.SelectedList);
-        isHintUsed = !options.EnableHints;
     }
 }
     private void UseHint(){
@@ -168,7 +163,7 @@ private VocabularyItem? GetRandomItem()
     }
 
 private void LoadVocabList(string listName){
-    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", $"{listName}.json");
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Vocab", $"{listName}.json");
     if (File.Exists(filePath))
     {
         var json = File.ReadAllText(filePath);
