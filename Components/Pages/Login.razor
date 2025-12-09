@@ -1,0 +1,41 @@
+@page "/Login"
+@rendermode InteractiveServer
+@using Blazored.LocalStorage
+@using Blazored.LocalStorage.StorageOptions
+@using NEA.Components.Layout
+@using System.Threading.Tasks
+@inject DatabaseService Db
+@inject NavigationManager NavMenu
+@inject UserState userState
+
+<PageTitle>Login</PageTitle>
+<InputText @bind-Value="username" placeholder="Username"/>
+<InputText @bind-Value="password" placeholder="Username"/>
+<button type="button"@onclick="LoginUser">Login</button>
+<button type="button" @onclick="Cancel">Cancel</button>
+<p>@error</p>
+
+@code{
+    [Inject] ILocalStorageService storageService { get; set;}
+    private string error;
+    private string username;
+    private string password;
+    private async Task LoginUser(){
+        username = username.Trim();
+        password = password.Trim();
+        var user = await Db.LoginUserAsync(username,password);
+        if(user != null){
+            await storageService.SetItemAsync("currentUser", user);
+            error = "Login Sucessful!";
+            userState.CurrentUser = user;
+            await storageService.SetItemAsync("currentUser", user);
+            NavMenu.NavigateTo("/");
+        }
+        else{
+            error = "Invalid Login";
+        }
+    }
+    private void Cancel(){
+        NavMenu.NavigateTo("/");
+    }
+}

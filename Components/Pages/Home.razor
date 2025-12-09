@@ -1,0 +1,27 @@
+﻿@page "/"
+@inject NavigationManager NavMan
+@rendermode InteractiveServer
+@inject UserState userState
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+@if(userState.CurrentUser != null){
+    <p> Welcome, @userState.CurrentUser.Username!</p>
+}
+
+<button class ="btn btn-primary" @onclick ="GoToLeaderboard"> Leaderboard</button>
+<button class ="btn btn-primary" @onclick ="GoToLoginPage"> Login</button>
+<button class ="btn btn-primary" @onclick ="GoToRegisterPage"> Register</button>
+<p> Welcome to my NEA :) please login to save your progress</p>
+@code {
+    private void GoToLeaderboard(){
+        NavMan.NavigateTo("/leaderboard");
+    }
+    private void GoToLoginPage(){
+        NavMan.NavigateTo("/login");
+    }
+    private void GoToRegisterPage(){
+        NavMan.NavigateTo("/register");
+    }
+
+}

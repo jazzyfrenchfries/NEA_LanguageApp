@@ -1,0 +1,105 @@
+@inject Blazored.Modal.Services.IModalService ModalService
+@using Blazored.Modal
+
+<div class="options-modal">
+    <h2>Conjugation Options</h2>
+
+    <div class="option-group">
+        <label>Select Conjugation List:</label>
+        <select @bind="selectedList" class="options-select">
+            @foreach (var list in conjugationLists)
+            {
+                <option value="@list">@list</option>
+            }
+        </select>
+    </div>
+
+    <div class="options-buttons">
+        <button class="check-button" @onclick="ApplyOptions">Apply</button>
+        <button class="end-button" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    private string selectedList;
+    private List<string> conjugationLists = new();
+
+
+    protected override void OnInitialized()
+    {
+        string dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Conjugation");
+
+        if (Directory.Exists(dataPath))
+        {
+            conjugationLists = Directory.GetFiles(dataPath, "*.json")
+                                  .Select(file => Path.GetFileNameWithoutExtension(file))
+                                  .ToList();
+
+            selectedList = conjugationLists.FirstOrDefault(); // default selected
+        }
+        else
+        {
+            conjugationLists.Add("No Lists Found");
+            selectedList = conjugationLists[0];
+        }
+    }
+
+    private void ApplyOptions()
+    {
+        var result = new ConjugationOptions
+        {
+            SelectedList = selectedList
+        };
+
+        BlazoredModal.CloseAsync(ModalResult.Ok(result));
+    }
+
+    private void Cancel() => BlazoredModal.CancelAsync();
+
+    public class ConjugationOptions
+    {
+        public string SelectedList { get; set; }
+    }
+}
+
+<style>
+.options-modal {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    max-width: 400px;
+}
+
+.options-modal h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #37493a;
+}
+
+.option-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.options-select {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.options-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.modal-dialog {
+    position: relative;
+    top: 20vh; 
+}
+
+</style>

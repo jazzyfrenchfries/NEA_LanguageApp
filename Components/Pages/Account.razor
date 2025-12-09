@@ -1,0 +1,18 @@
+@page "/Account"
+@rendermode InteractiveServer
+@using NEA.Components.Layout
+@inject NavigationManager NavMenu
+<PageTitle>Account</PageTitle>
+<h1>Account Page</h1>
+<p>Welcome to your account page!</p>
+<button type="button" @onclick="LogoutUser">Logout</button>
+<button type="button" @onclick="Cancel">Cancel</button>
+@code{
+    
+    private void LogoutUser(){
+        // Logic to log out the user goes here
+    }
+    private void Cancel(){
+        NavMenu.NavigateTo("/");
+    }
+}

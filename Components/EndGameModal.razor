@@ -1,0 +1,37 @@
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using BootstrapBlazor.Components
+@inject NavigationManager NavigationManager
+
+<div class="modal-body">
+    <p>Your final score: @Score</p>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-secondary" @onclick="Home">Home</button>
+    <button class="btn btn-secondary" @onclick="Account">Account</button>
+    <button class="btn btn-secondary" @onclick="Redo">Try Again</button>
+
+</div>
+
+@code {
+    [Parameter] public int Score { get; set; }
+    
+    [CascadingParameter] public BlazoredModalInstance ModalInstance { get; set; } = default!;
+
+    private async Task Redo()
+    {
+        await ModalInstance.CloseAsync(); 
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+    private async Task Home()
+    {
+        await ModalInstance.CloseAsync(); 
+        NavigationManager.NavigateTo("/");
+    }
+    private async Task Account()
+    {
+        await ModalInstance.CloseAsync();
+        NavigationManager.NavigateTo("/account");
+    }
+}
