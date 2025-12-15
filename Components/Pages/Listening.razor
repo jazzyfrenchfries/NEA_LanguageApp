@@ -1,8 +1,15 @@
 @page "/listening"
 @rendermode InteractiveServer
+@using Blazored.LocalStorage
 @using Blazored.Modal
 @using Blazored.Modal.Services
+@using NEA.Components.Layout
+
+@inject DatabaseService Db
+@inject NavigationManager NavMenu
+@inject ILocalStorageService storageService
 @inject IModalService ModalService
+@inject UserState userState
 <PageTitle>Listening</PageTitle>
 
 
@@ -11,43 +18,138 @@
    
         <h1>Listening Game</h1>
         <p>Test your listening skills! Click the button below to start.</p>
-         <div class="centered-container">
-    <button class="start-button" @onclick="StartListening">start</button>
-   </div>
+       <div class="centered-container">
+        <button class="start-button" @onclick="StartListening">Start</button>
+      <button class="options-button" @onclick="GameOptions">Options</button>
+
+    </div>
+    <p>Logged in as @userState.CurrentUser.Username</p>
 }
 else
 {
     <div class="listening-container">
         <h1>Listening</h1>
         <p>Your score: @score</p>
-        <p>Listen to This: [ insert listening info here ]</p>
-        <textarea @bind="userAnswer" placeholder="Type your answer here..." class="answer-box"></textarea>
+
+        @if (CurrentItem != null)
+        { 
+            <p> @CurrentItem.FullText</p>
+            <audio controls="controls">
+                <source src="@CurrentItem.AudioPath" type="audio/mp3">
+            </audio>
+            
+            
+        }
+        @if (isHintUsed && !string.IsNullOrEmpty(hint))
+        {
+            <p>Hint: @hint</p>
+        }    
+
+        <textarea 
+            @bind="userAnswer" 
+            @bind:event="oninput" 
+            placeholder="Type your answer here..." 
+            class="answer-box" 
+            disabled="@iscorrect">
+        </textarea>
+    
+        @if (hasSubmitted)
+        {
+            <div class="feedback">
+                @if (iscorrect)
+                {
+                    <span class="correct">Correct! Click "Next Question" to continue.</span>
+                }
+                else
+                {
+                    <span class="incorrect">Incorrect!</span>
+                }
+            </div>
+        }
+
         <div class="centered-container">
-        <button Class="check-button" @onclick="CheckAnswer">Submit</button>
-        <button Class="end-button" @onclick="EndGame"> End</button>  
-        <button Class="hint-button" @onclick="UseHint">Hint</button>
+            @if (!iscorrect)
+            {
+                <button class="check-button" @onclick="CheckAnswer">Submit</button>
+            }
+            else
+            {
+                <button class="check-button" @onclick="NextQuestion">Next Question</button>
+            }
+
+            <button class="end-button" @onclick="EndGame">End</button>  
+            @if(!isHintUsed)
+            {
+            <button class="hint-button" @onclick="UseHint">Hint</button>
+            }
         </div>
     </div>
 }
 
+
 @code {
+        private User currentUser;
     bool isPlaying = false;
     int score = 0;
-    string userAnswer = "";
+    string userAnswer;
+    string hint;
+    private int currentkey ;
+    private bool iscorrect;
+    private bool hasSubmitted = false;
+    private bool isHintUsed = false;
+    private string defaultListening = "Listening";
+    int totalCompleted = 0;
+    private List<ListeningItem> items = new();
+    private ListeningItem? CurrentItem => items.FirstOrDefault(i => i.ListeningID == currentkey);
+    private static readonly Random random = new();
     
 
-    private void StartListening()
+    private ListeningItem? GetRandomItem()
+{
+    if (items == null || items.Count == 0)
+        return null; // nothing to pick
+
+    return items[random.Next(items.Count)];
+}
+    protected override async  void OnInitialized()
     {
+        currentUser = await storageService.GetItemAsync<User>("currentUser");
+        if(currentUser == null){
+            NavMenu.NavigateTo("/login");
+            return;
+        }
+        items = await Db.GetListeningsAsync();
+
+    }
+    private void StartListening(){
+        var item = GetRandomItem();
         isPlaying = true;
+        userAnswer = "";
+        hint = string.Empty;
+        currentkey = item.ListeningID;
+        iscorrect = false;
+        hasSubmitted = false;
+        isHintUsed = false;
     }
 
-    private void CheckAnswer()
+    private async Task CheckAnswer()
     {
-        if (!string.IsNullOrWhiteSpace(userAnswer))
-        {
-            score++;
-            userAnswer = "";
+        hasSubmitted = true;
+    if (string.Equals(userAnswer?.Trim(), CurrentItem?.CorrectAnswer?.Trim(), StringComparison.OrdinalIgnoreCase)){
+        iscorrect = true;
+        score++;
+        await Db.SaveUserScoreAsync(currentUser.UserID,"Listening",currentkey,score,iscorrect);
+        currentUser.TotalScore += score;
+        await storageService.SetItemAsync("currentUser", currentUser);
+        
+    }
+    else{
+        iscorrect = false;
+        totalCompleted++;
+        if (totalCompleted >= items.Count){
+            EndGame();
         }
+    }
     }
      private void EndGame()
     {
@@ -56,13 +158,24 @@ else
 
         ModalService.Show<EndGameModal>("Game Over", parameters);
     }
+    private void NextQuestion(){
+    var item = items[random.Next(items.Count)];
+    currentkey = item.ListeningID;
+    userAnswer = "";
+    iscorrect = false;
+    hasSubmitted = false;
+    isHintUsed = false;
+}
+    private async Task GameOptions(){
 
-
+    }
     private void UseHint()
     {
-        userAnswer = "Hint: ...";
+        isHintUsed = true;
+        hint = CurrentItem?.Hint ?? string.Empty;
     }
 }
+
 
 <style>
 <style>

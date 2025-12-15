@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Text;
 
+
 public class DatabaseService
 {
     private readonly string _conn;
@@ -18,7 +19,7 @@ public class DatabaseService
             throw new ArgumentNullException(nameof(configuration));
         }
         _conn = configuration.GetConnectionString("FrenchDb");
-        Console.WriteLine("=== ACtive Connection String");
+        Console.WriteLine("=== Active Connection String");
         Console.WriteLine(_conn);
     }
 
@@ -85,7 +86,8 @@ public class DatabaseService
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                list.Add(new VocabItem {
+                list.Add(new VocabItem
+                {
                     VocabID = reader.GetInt32(0),
                     FrenchWord = reader.GetString(1),
                     Translation = reader.IsDBNull(2) ? null : reader.GetString(2),
@@ -94,6 +96,33 @@ public class DatabaseService
             }
         }
 
+        return list;
+    }
+
+    public async Task<List<ListeningItem>> GetListeningsAsync()
+    {
+        var list = new List<ListeningItem>();
+        using var conn = new SqlConnection(_conn);
+        using var cmd = new SqlCommand(
+            "SELECT ListeningID, AudioPath, CorrectAnswer, FullText, Hint FROM ListeningBank", conn
+        ); 
+            
+            await conn.OpenAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                list.Add(new ListeningItem
+                {
+                    ListeningID = reader.GetInt32(0),
+                    AudioPath = reader.GetString(1),
+                    CorrectAnswer = reader.GetString(2),
+                    FullText = reader.GetString(3),
+                    Hint = reader.GetString(4)
+
+                });
+            }
+
+        
         return list;
     }
 

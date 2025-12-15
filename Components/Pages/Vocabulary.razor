@@ -1,7 +1,12 @@
 @page "/vocabulary"
 @rendermode InteractiveServer
+@using Blazored.LocalStorage
 @using Blazored.Modal
 @using Blazored.Modal.Services
+@inject DatabaseService Db
+@inject ILocalStorageService storageService
+@inject NavigationManager NavMenu 
+@inject UserState userState
 @inject IModalService ModalService
 <PageTitle>vocabulary</PageTitle>
 
@@ -23,7 +28,7 @@ else
 
         @if (CurrentItem != null)
         {
-            <p>What is this in English? : <strong>@CurrentItem.Word</strong></p>
+            <p>What is this in English? : <strong>@CurrentItem.FrenchWord</strong></p>
         }
         @if (isHintUsed && !string.IsNullOrEmpty(hint))
         {
@@ -47,7 +52,7 @@ else
                 }
                 else
                 {
-                    <span class="incorrect">Incorrect! The correct answer is: @CurrentItem?.Definition</span>
+                    <span class="incorrect">Incorrect! The correct answer is: @CurrentItem?.Translation</span>
                 }
             </div>
         }
@@ -74,6 +79,7 @@ else
 @code {
     bool isPlaying = false;
     int score = 0;
+    private User currentUser;
     string userAnswer;
     string hint;
     private int currentkey ;
@@ -82,21 +88,21 @@ else
     private bool isHintUsed = false;
     private string defaultVocabList = "AllVocab";
     int totalCompleted = 0;
-    private List<VocabularyItem> items = new();
-     private VocabularyItem? CurrentItem => items.FirstOrDefault(i => i.Key == currentkey);
+    private List<VocabItem> items = new();
+    private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentkey);
     private static readonly Random random = new();
 
-    public class VocabularyItem
-    {
-        public int Key { get; set; }
-        public string Word { get; set; } = string.Empty;
-        public string Definition { get; set; } = string.Empty;
-        public string Hint { get; set; } = string.Empty;
+
+  protected override async Task OnInitializedAsync()
+  {
+        currentUser = await storageService.GetItemAsync<User>("currentUser");
+        if(currentUser == null){
+            NavMenu.NavigateTo("/login");
+        }
+        StartVocabulary();
+        items = await Db.GetVocabularyAsync();
     }
-    protected override void OnInitialized(){
-    LoadVocabList(defaultVocabList);
-}
-private VocabularyItem? GetRandomItem()
+private VocabItem? GetRandomItem()
 {
     if (items == null || items.Count == 0)
         return null; // nothing to pick
@@ -106,11 +112,15 @@ private VocabularyItem? GetRandomItem()
    private void StartVocabulary()
 {
     var item = GetRandomItem();
+    if(item == null){
+        isPlaying = false;
+        return;
+    }
 
     isPlaying = true;
     userAnswer = "";
     hint = string.Empty;
-    currentkey = item.Key;
+    currentkey = item.VocabID;
     iscorrect = false;
     hasSubmitted = false;
     isHintUsed = false;
@@ -118,7 +128,7 @@ private VocabularyItem? GetRandomItem()
 
    private void NextQuestion(){
     var item = items[random.Next(items.Count)];
-    currentkey = item.Key;
+    currentkey = item.VocabID;
     userAnswer = "";
     iscorrect = false;
     hasSubmitted = false;
@@ -126,7 +136,7 @@ private VocabularyItem? GetRandomItem()
 }
     private void CheckAnswer(){
         hasSubmitted = true;
-    if (string.Equals(userAnswer?.Trim(), CurrentItem?.Definition?.Trim(), StringComparison.OrdinalIgnoreCase)){
+    if (string.Equals(userAnswer?.Trim(), CurrentItem?.Translation?.Trim(), StringComparison.OrdinalIgnoreCase)){
         iscorrect = true;
         score++;
         
@@ -154,26 +164,13 @@ private VocabularyItem? GetRandomItem()
     if (!result.Cancelled)
     {
         var options = (OptionsModalVocab.VocabOptions)result.Data;
-        LoadVocabList(options.SelectedList);
+        
     }
 }
     private void UseHint(){
         isHintUsed = true;
         hint = CurrentItem?.Hint ?? string.Empty;
     }
-
-private void LoadVocabList(string listName){
-    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Vocab", $"{listName}.json");
-    if (File.Exists(filePath))
-    {
-        var json = File.ReadAllText(filePath);
-        items = System.Text.Json.JsonSerializer.Deserialize<List<VocabularyItem>>(json) ?? new List<VocabularyItem>();
-    }
-    else
-    {
-        items = new List<VocabularyItem>(); 
-    }
-}
 }
 
 
