@@ -1,29 +1,36 @@
 @page "/listening"
 @rendermode InteractiveServer
+
 @using Blazored.LocalStorage
 @using Blazored.Modal
 @using Blazored.Modal.Services
-@using NEA.Components.Layout
 
 @inject DatabaseService Db
 @inject NavigationManager NavMenu
-@inject ILocalStorageService storageService
+@inject ILocalStorageService LocalStorage
 @inject IModalService ModalService
-@inject UserState userState
+@inject UserState UserState
+
 <PageTitle>Listening</PageTitle>
 
-
-@if (!isPlaying)
+@if (!isLoaded)
 {
-   
-        <h1>Listening Game</h1>
-        <p>Test your listening skills! Click the button below to start.</p>
-       <div class="centered-container">
-        <button class="start-button" @onclick="StartListening">Start</button>
-      <button class="options-button" @onclick="GameOptions">Options</button>
+    <p>Loading...</p>
+}
+else if (UserState.CurrentUser == null)
+{
+    <p>You must be logged in to access this page.</p>
+}
+else if (!isPlaying)
+{
+    <h1>Listening Game</h1>
+    <p>Test your listening skills! Click start to begin.</p>
 
+    <div class="centered-container">
+        <button class="start-button" @onclick="StartListening">Start</button>
     </div>
-    <p>Logged in as @userState.CurrentUser.Username</p>
+
+    <p>Logged in as <strong>@UserState.CurrentUser.Username</strong></p>
 }
 else
 {
@@ -32,147 +39,146 @@ else
         <p>Your score: @score</p>
 
         @if (CurrentItem != null)
-        { 
-            <p> @CurrentItem.FullText</p>
-            <audio controls="controls">
-                <source src="@CurrentItem.AudioPath" type="audio/mp3">
-            </audio>
-            
-            
-        }
-        @if (isHintUsed && !string.IsNullOrEmpty(hint))
         {
-            <p>Hint: @hint</p>
-        }    
+            <p>@CurrentItem.FullText</p>
 
-        <textarea 
-            @bind="userAnswer" 
-            @bind:event="oninput" 
-            placeholder="Type your answer here..." 
-            class="answer-box" 
-            disabled="@iscorrect">
+            <audio controls>
+                <source src="@CurrentItem.AudioPath" type="audio/mp3" />
+            </audio>
+        }
+
+        @if (isHintUsed)
+        {
+            <p><strong>Hint:</strong> @CurrentItem?.Hint</p>
+        }
+
+        <textarea
+            @bind="userAnswer"
+            @bind:event="oninput"
+            placeholder="Type your answer here..."
+            disabled="@iscorrect"
+            class="answer-box">
         </textarea>
-    
+
         @if (hasSubmitted)
         {
-            <div class="feedback">
-                @if (iscorrect)
-                {
-                    <span class="correct">Correct! Click "Next Question" to continue.</span>
-                }
-                else
-                {
-                    <span class="incorrect">Incorrect!</span>
-                }
-            </div>
+            <p class="@(iscorrect ? "correct" : "incorrect")">
+                @(iscorrect ? "Correct!" : "Incorrect")
+            </p>
         }
 
         <div class="centered-container">
             @if (!iscorrect)
             {
-                <button class="check-button" @onclick="CheckAnswer">Submit</button>
+                <button @onclick="CheckAnswer">Submit</button>
             }
             else
             {
-                <button class="check-button" @onclick="NextQuestion">Next Question</button>
+                <button @onclick="NextQuestion">Next Question</button>
             }
 
-            <button class="end-button" @onclick="EndGame">End</button>  
-            @if(!isHintUsed)
+            <button @onclick="EndGame">End</button>
+
+            @if (!isHintUsed)
             {
-            <button class="hint-button" @onclick="UseHint">Hint</button>
+                <button @onclick="UseHint">Hint</button>
             }
         </div>
     </div>
 }
-
-
 @code {
-        private User currentUser;
-    bool isPlaying = false;
-    int score = 0;
-    string userAnswer;
-    string hint;
-    private int currentkey ;
-    private bool iscorrect;
+    private bool isLoaded = false;
+    private bool isPlaying = false;
+    private bool iscorrect = false;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
-    private string defaultListening = "Listening";
-    int totalCompleted = 0;
+
+    private int score = 0;
+    private int currentKey;
+
+    private string userAnswer = "";
+
     private List<ListeningItem> items = new();
-    private ListeningItem? CurrentItem => items.FirstOrDefault(i => i.ListeningID == currentkey);
-    private static readonly Random random = new();
-    
 
-    private ListeningItem? GetRandomItem()
-{
-    if (items == null || items.Count == 0)
-        return null; // nothing to pick
+    private ListeningItem? CurrentItem =>
+        items.FirstOrDefault(i => i.ListeningID == currentKey);
 
-    return items[random.Next(items.Count)];
-}
-    protected override async  void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        currentUser = await storageService.GetItemAsync<User>("currentUser");
-        if(currentUser == null){
+        if (!firstRender) return;
+
+        // Load user from LocalStorage AFTER JS is ready
+        var user = await LocalStorage.GetItemAsync<User>("currentUser");
+
+        if (user == null)
+        {
             NavMenu.NavigateTo("/login");
             return;
         }
+
+        UserState.SetUser(user);
+
+        // Load listening items from DB
         items = await Db.GetListeningsAsync();
 
+        isLoaded = true;
+        StateHasChanged();
     }
-    private void StartListening(){
-        var item = GetRandomItem();
+
+    private void StartListening()
+    {
+        if (items.Count == 0) return;
+
+        var item = items[Random.Shared.Next(items.Count)];
+        currentKey = item.ListeningID;
+
         isPlaying = true;
-        userAnswer = "";
-        hint = string.Empty;
-        currentkey = item.ListeningID;
         iscorrect = false;
         hasSubmitted = false;
         isHintUsed = false;
+        userAnswer = "";
     }
 
     private async Task CheckAnswer()
     {
         hasSubmitted = true;
-    if (string.Equals(userAnswer?.Trim(), CurrentItem?.CorrectAnswer?.Trim(), StringComparison.OrdinalIgnoreCase)){
-        iscorrect = true;
-        score++;
-        await Db.SaveUserScoreAsync(currentUser.UserID,"Listening",currentkey,score,iscorrect);
-        currentUser.TotalScore += score;
-        await storageService.SetItemAsync("currentUser", currentUser);
-        
-    }
-    else{
-        iscorrect = false;
-        totalCompleted++;
-        if (totalCompleted >= items.Count){
-            EndGame();
+
+        if (CurrentItem == null) return;
+
+        if (string.Equals(
+            userAnswer.Trim(),
+            CurrentItem.CorrectAnswer.Trim(),
+            StringComparison.OrdinalIgnoreCase))
+        {
+            iscorrect = true;
+            score++;
+
+            await Db.SaveUserScoreAsync(
+                UserState.CurrentUser!.UserID,
+                "Listening",
+                currentKey,
+                1,
+                true
+            );
+
+            UserState.CurrentUser.TotalScore += 1;
+            await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
         }
     }
-    }
-     private void EndGame()
+
+    private void NextQuestion()
     {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(EndGameModal.Score), score);
-
-        ModalService.Show<EndGameModal>("Game Over", parameters);
+        StartListening();
     }
-    private void NextQuestion(){
-    var item = items[random.Next(items.Count)];
-    currentkey = item.ListeningID;
-    userAnswer = "";
-    iscorrect = false;
-    hasSubmitted = false;
-    isHintUsed = false;
-}
-    private async Task GameOptions(){
 
-    }
     private void UseHint()
     {
         isHintUsed = true;
-        hint = CurrentItem?.Hint ?? string.Empty;
+    }
+    private void EndGame(){
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(EndGameModal.Score), score);
+        ModalService.Show<EndGameModal>("Game Over", parameters);
     }
 }
 

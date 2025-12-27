@@ -1,18 +1,44 @@
 @page "/Account"
 @rendermode InteractiveServer
+@using Blazored.LocalStorage
 @using NEA.Components.Layout
+@using System.Threading.Tasks
 @inject NavigationManager NavMenu
+@inject ILocalStorageService LocalStorage
+@inject UserState userState
 <PageTitle>Account</PageTitle>
 <h1>Account Page</h1>
-<p>Welcome to your account page!</p>
-<button type="button" @onclick="LogoutUser">Logout</button>
-<button type="button" @onclick="Cancel">Cancel</button>
+<h2>Welcome to your account page!</h2>
+@if (userState.CurrentUser == null){
+    <p> You are not logged in </p>
+    <button @onclick="GoToLogin">Login</button>
+}
+else{
+    <p> Logged in as <strong>@userState.CurrentUser.Username</strong></p>
+    <button type="button" @onclick="LogoutUser">Logout</button>
+}
 @code{
-    
-    private void LogoutUser(){
-        // Logic to log out the user goes here
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var user = await LocalStorage.GetItemAsync<User>("currentUser");
+        if (user == null)
+        {
+            NavMenu.NavigateTo("/login");
+            return;
+        }
+
+        userState.SetUser(user);
+        StateHasChanged();
     }
-    private void Cancel(){
-        NavMenu.NavigateTo("/");
+
+    private async Task LogoutUser(){
+        await LocalStorage.RemoveItemAsync("currentUser");
+        userState.ClearUser();
+        NavMenu.NavigateTo("/", forceLoad: true);
+    }
+    private void GoToLogin(){
+        NavMenu.NavigateTo("/login");
     }
 }

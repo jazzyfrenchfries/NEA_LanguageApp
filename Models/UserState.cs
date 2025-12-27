@@ -1,4 +1,13 @@
 public class UserState()
 {
-    public User CurrentUser{ get; set; }
+    public User CurrentUser{ get; private set; }
+    public bool IsLoggedIn => CurrentUser != null;
+    public void SetUser(User user)
+    {
+        CurrentUser = user;
+    }
+    public void ClearUser()
+    {
+        CurrentUser = null;
+    }
 }

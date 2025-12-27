@@ -1,25 +1,37 @@
 @page "/conjugation"
 @rendermode InteractiveServer
+
 @using Blazored.LocalStorage
 @using Blazored.Modal
 @using Blazored.Modal.Services
 @using NEA.Components.Layout
+
 @inject DatabaseService Db
 @inject NavigationManager NavMenu
-@inject ILocalStorageService storageService
+@inject ILocalStorageService LocalStorage
 @inject IModalService ModalService
-@inject UserState userState
+@inject UserState UserState
+
 <PageTitle>Conjugation</PageTitle>
-@if (!isPlaying)
+
+@if (!isLoaded)
+{
+    <p>Loading...</p>
+}
+else if (!isPlaying)
 {
     <h1>Conjugation Game</h1>
     <p>Test your conjugation skills! Click the button below to start.</p>
+
     <div class="centered-container">
         <button class="start-button" @onclick="StartConjugation">Start</button>
-      <button class="options-button" @onclick="GameOptions">Options</button>
-
+        <button class="options-button" @onclick="GameOptions">Options</button>
     </div>
-    <p>Logged in as @userState.CurrentUser.Username</p>
+
+    @if (UserState.CurrentUser != null)
+    {
+        <p>Logged in as <strong>@UserState.CurrentUser.Username</strong></p>
+    }
 }
 else
 {
@@ -29,33 +41,32 @@ else
 
         @if (CurrentItem != null)
         {
-            <p>Fill in the gaps: <strong>@CurrentItem.Phrase</strong></p>
-            <p> Tense: @CurrentItem.Tense</p>
+            <p><strong>@CurrentItem.Pronoun</strong></p>
+            <p>Tense: @CurrentItem.Tense</p>
             <p>Verb: @CurrentItem.Verb</p>
         }
+
         @if (isHintUsed && !string.IsNullOrEmpty(hint))
         {
             <p>Hint: @hint</p>
-        }    
+        }
 
-        <textarea 
-            @bind="userAnswer" 
-            @bind:event="oninput" 
-            placeholder="Type your answer here..." 
-            class="answer-box" 
-            disabled="@iscorrect">
-        </textarea>
-    
+        <input class="answer-box"
+               @bind="userAnswer"
+               @bind:event="oninput"
+               placeholder="Type your answer..."
+               disabled="@iscorrect" />
+
         @if (hasSubmitted)
         {
             <div class="feedback">
                 @if (iscorrect)
                 {
-                    <span class="correct">Correct! Click "Next Question" to continue.</span>
+                    <span class="correct">Correct!</span>
                 }
                 else
                 {
-                    <span class="incorrect">Incorrect!</span>
+                    <span class="incorrect">Incorrect</span>
                 }
             </div>
         }
@@ -67,131 +78,120 @@ else
             }
             else
             {
-                <button class="check-button" @onclick="NextQuestion">Next Question</button>
+                <button class="check-button" @onclick="NextQuestion">Next</button>
             }
 
-            <button class="end-button" @onclick="EndGame">End</button>  
-            @if(!isHintUsed)
+            <button class="end-button" @onclick="EndGame">End</button>
+
+            @if (!isHintUsed)
             {
-            <button class="hint-button" @onclick="UseHint">Hint</button>
+                <button class="hint-button" @onclick="UseHint">Hint</button>
             }
         </div>
     </div>
 }
 
 @code {
-    private User currentUser;
-bool isPlaying = false;
-    int score = 0;
-    string userAnswer;
-    string hint;
-    private int currentkey ;
-    private bool iscorrect;
+    private bool isLoaded = false;
+    private bool isPlaying = false;
+    private bool iscorrect = false;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
-    private string defaultConjugationList = "Conjugation";
-    int totalCompleted = 0;
+
+    private int score = 0;
+    private int currentKey;
+    private string userAnswer = "";
+    private string hint = "";
+
     private List<ConjugationItem> items = new();
-     private ConjugationItem? CurrentItem => items.FirstOrDefault(i => i.Key == currentkey);
-    private static readonly Random random = new();
-     public class ConjugationItem
+    private ConjugationItem? CurrentItem =>
+        items.FirstOrDefault(i => i.ConjugationID == currentKey);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        public int Key { get; set; }
-        public string Phrase{ get; set; } = string.Empty;
-        public string GapFill { get; set; } = string.Empty;
-        public string Verb{get; set; } = string.Empty;
-        public string Tense{get; set; } = string.Empty;
-        public string Hint { get; set; } = string.Empty;
-    }
-    protected override async void OnInitialized(){
-        currentUser = await storageService.GetItemAsync<User>("currentUser");
-        if(currentUser == null){
+        if (!firstRender) return;
+
+        var user = await LocalStorage.GetItemAsync<User>("currentUser");
+        if (user == null)
+        {
             NavMenu.NavigateTo("/login");
+            return;
         }
-        
-    LoadConjugationList(defaultConjugationList);
-}
-private ConjugationItem? GetRandomItem()
-{
-    if (items == null || items.Count == 0)
-        return null; // nothing to pick
 
-    return items[random.Next(items.Count)];
-}
-   private void StartConjugation()
-{
-    var item = GetRandomItem();
+        UserState.SetUser(user);
 
-    isPlaying = true;
-    userAnswer = "";
-    hint = string.Empty;
-    currentkey = item.Key;
-    iscorrect = false;
-    hasSubmitted = false;
-    isHintUsed = false;
-}
+        items = await Db.GetConjugationAsync();
+        isLoaded = true;
 
-   private void NextQuestion(){
-    var item = items[random.Next(items.Count)];
-    currentkey = item.Key;
-    userAnswer = "";
-    iscorrect = false;
-    hasSubmitted = false;
-    isHintUsed = false;
-}
-    private async Task CheckAnswer(){
-        hasSubmitted = true;
-    if (string.Equals(userAnswer?.Trim(), CurrentItem?.GapFill?.Trim(), StringComparison.OrdinalIgnoreCase)){
-        iscorrect = true;
-        score++;
-        await Db.SaveUserScoreAsync(currentUser.UserID,"Conjugation",currentkey,score,iscorrect);
-        currentUser.TotalScore += score;
-        await storageService.SetItemAsync("currentUser", currentUser);
-        
+        StateHasChanged();
     }
-    else{
+
+    private void StartConjugation()
+    {
+        if (items.Count == 0) return;
+
+        var item = items[Random.Shared.Next(items.Count)];
+        currentKey = item.ConjugationID;
+
+        isPlaying = true;
         iscorrect = false;
-        totalCompleted++;
-        if (totalCompleted >= items.Count){
-            EndGame();
+        hasSubmitted = false;
+        isHintUsed = false;
+        userAnswer = "";
+        hint = "";
+    }
+
+    private async Task CheckAnswer()
+    {
+        hasSubmitted = true;
+
+        if (string.Equals(
+            userAnswer.Trim(),
+            CurrentItem?.Verb?.Trim(),
+            StringComparison.OrdinalIgnoreCase))
+        {
+            iscorrect = true;
+            score++;
+
+            await Db.SaveUserScoreAsync(
+                UserState.CurrentUser!.UserID,
+                "Conjugation",
+                currentKey,
+                1,
+                true);
+
+            UserState.CurrentUser.TotalScore++;
+            await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
         }
     }
-}
 
-     private void EndGame(){
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(EndGameModal.Score), score);
+    private void NextQuestion()
+    {
+        StartConjugation();
+    }
+
+    private void UseHint()
+    {
+        isHintUsed = true;
+        hint = CurrentItem?.Hint ?? "";
+    }
+
+    private void EndGame()
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(EndGameModal.Score), score }
+        };
 
         ModalService.Show<EndGameModal>("Game Over", parameters);
+        isPlaying = false;
+        score = 0;
     }
+
     private async Task GameOptions()
-{
-    var modal = ModalService.Show<OptionsModalConjugation>("Game Options");
-    var result = await modal.Result;
-
-    if (!result.Cancelled)
     {
-        var options = (OptionsModalConjugation.ConjugationOptions)result.Data;
-        LoadConjugationList(options.SelectedList);
+        var modal = ModalService.Show<OptionsModalConjugation>("Game Options");
+        await modal.Result;
     }
-}
-    private void UseHint(){
-        isHintUsed = true;
-        hint = CurrentItem?.Hint ?? string.Empty;
-    }
-
-private void LoadConjugationList(string listName){
-    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Conjugation", $"{listName}.json");
-    if (File.Exists(filePath))
-    {
-        var json = File.ReadAllText(filePath);
-        items = System.Text.Json.JsonSerializer.Deserialize<List<ConjugationItem>>(json) ?? new List<ConjugationItem>();
-    }
-    else
-    {
-        items = new List<ConjugationItem>(); 
-    }
-}
 }
 
 <style>

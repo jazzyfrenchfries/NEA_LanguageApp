@@ -17,8 +17,10 @@
     <div class="centered-container">
         <button class="start-button" @onclick="StartVocabulary">Start</button>
       <button class="options-button" @onclick="GameOptions">Options</button>
-
+      
     </div>
+    <p>Logged in as @userState.CurrentUser.Username</p>
+
 }
 else
 {
@@ -86,7 +88,6 @@ else
     private bool iscorrect;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
-    private string defaultVocabList = "AllVocab";
     int totalCompleted = 0;
     private List<VocabItem> items = new();
     private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentkey);

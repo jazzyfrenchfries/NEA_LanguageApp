@@ -27,7 +27,7 @@
         if(user != null){
             await storageService.SetItemAsync("currentUser", user);
             error = "Login Sucessful!";
-            userState.CurrentUser = user;
+            userState.SetUser(user);
             await storageService.SetItemAsync("currentUser", user);
             NavMenu.NavigateTo("/");
         }

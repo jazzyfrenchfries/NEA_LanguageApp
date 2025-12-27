@@ -61,17 +61,22 @@ public class DatabaseService
         if (await reader.ReadAsync())
         {
             var storedHash = reader.GetString(2);
-            if(storedHash == hashed)
+            if (storedHash == hashed)
             {
                 return new User
                 {
-                UserID = reader.GetInt32(0),
-                Username = reader.GetString(1),
-                TotalScore = reader.GetInt32(3)
-            };
-                
-            }   
+                    UserID = reader.GetInt32(0),
+                    Username = reader.GetString(1),
+                    TotalScore = reader.GetInt32(3)
+                };
+
+            }
         }
+        return null;
+    }
+    public async Task<User> LogoutUserAsync(string username, string password)
+    {
+       // put logout thing here :) 
         return null;
     }
     public async Task<List<VocabItem>> GetVocabularyAsync()
@@ -105,19 +110,46 @@ public class DatabaseService
         using var conn = new SqlConnection(_conn);
         using var cmd = new SqlCommand(
             "SELECT ListeningID, AudioPath, CorrectAnswer, FullText, Hint FROM ListeningBank", conn
+        );
+
+        await conn.OpenAsync();
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            list.Add(new ListeningItem
+            {
+                ListeningID = reader.GetInt32(0),
+                AudioPath = reader.GetString(1),
+                CorrectAnswer = reader.GetString(2),
+                FullText = reader.GetString(3),
+                Hint = reader.GetString(4)
+
+            });
+        }
+
+
+        return list;
+    }
+    public async Task<List<ConjugationItem>> GetConjugationAsync()
+    {
+        var list = new List<ConjugationItem>();
+        using var conn = new SqlConnection(_conn);
+        using var cmd = new SqlCommand(
+            "SELECT ConjugationID, Verb , Pronoun,  Tense ,CorrectAnswer, Hint FROM ConjugationBank", conn
         ); 
             
             await conn.OpenAsync();
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                list.Add(new ListeningItem
+                list.Add(new ConjugationItem
                 {
-                    ListeningID = reader.GetInt32(0),
-                    AudioPath = reader.GetString(1),
-                    CorrectAnswer = reader.GetString(2),
-                    FullText = reader.GetString(3),
-                    Hint = reader.GetString(4)
+                    ConjugationID = reader.GetInt32(0),
+                    Verb = reader.GetString(1),
+                    Pronoun = reader.GetString(2),
+                    Tense = reader.GetString(3),
+                    CorectAnswer = reader.GetString(4),
+                    Hint = reader.GetString(5)
 
                 });
             }
