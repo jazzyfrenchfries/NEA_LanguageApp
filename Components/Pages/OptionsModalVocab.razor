@@ -7,10 +7,7 @@
     <div class="option-group">
         <label>Select Vocabulary List:</label>
         <select @bind="selectedList" class="options-select">
-            @foreach (var list in vocabLists)
-            {
-                <option value="@list">@list</option>
-            }
+            <option value="All">All Vocabulary</option>
         </select>
     </div>
 
@@ -19,50 +16,36 @@
         <button class="end-button" @onclick="Cancel">Cancel</button>
     </div>
 </div>
+
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
 
-    private string selectedList;
+    private string selectedList = "All"; 
     private List<string> vocabLists = new();
 
-
-    protected override async void  OnInitialized()
-    {
-        string dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Vocab");
-
-        if (Directory.Exists(dataPath))
-        {
-            vocabLists = Directory.GetFiles(dataPath, "*.json")
-                                  .Select(file => Path.GetFileNameWithoutExtension(file))
-                                  .ToList();
-
-            selectedList = vocabLists.FirstOrDefault(); // default selected
-        }
-        else
-        {
-            vocabLists.Add("No Lists Found");
-            selectedList = vocabLists[0];
-        }
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        if(!firstRender)return;
+        vocabLists = new List<string> {"All"};
+        selectedList = vocabLists.FirstOrDefault() ?? "All";
+        StateHasChanged();
     }
-
-    private void ApplyOptions()
+    private async Task ApplyOptions()
     {
         var result = new VocabOptions
         {
             SelectedList = selectedList
         };
 
-        BlazoredModal.CloseAsync(ModalResult.Ok(result));
+        await BlazoredModal.CloseAsync(ModalResult.Ok(result));
     }
 
-    private void Cancel() => BlazoredModal.CancelAsync();
+    private async Task Cancel() => BlazoredModal.CancelAsync();
 
     public class VocabOptions
     {
         public string SelectedList { get; set; }
     }
 }
-
 <style>
 .options-modal {
     padding: 1.5rem;

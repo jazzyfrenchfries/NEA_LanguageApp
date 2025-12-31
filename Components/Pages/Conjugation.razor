@@ -4,6 +4,8 @@
 @using Blazored.LocalStorage
 @using Blazored.Modal
 @using Blazored.Modal.Services
+@using BootstrapBlazor.Components
+@using Microsoft.Extensions.Options
 @using NEA.Components.Layout
 
 @inject DatabaseService Db
@@ -146,7 +148,7 @@ else
 
         if (string.Equals(
             userAnswer.Trim(),
-            CurrentItem?.Verb?.Trim(),
+            CurrentItem?.CorectAnswer?.Trim(),
             StringComparison.OrdinalIgnoreCase))
         {
             iscorrect = true;
@@ -190,193 +192,132 @@ else
     private async Task GameOptions()
     {
         var modal = ModalService.Show<OptionsModalConjugation>("Game Options");
-        await modal.Result;
+        var result =await modal.Result;
+        if(!result.Cancelled){
+            var options = (OptionsModalConjugation.ConjugationOptions)result.Data;
+        }
     }
 }
 
 <style>
-
-/* Container */
 .conjugation-container {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 2rem;
-    border-radius: 16px;
-    background: #ffffff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    overflow: hidden;
+max-width: 850px;
+margin: 2.5rem auto;
+padding: 2.5rem;
+border-radius: 24px;
+background: var(--card-bg);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .centered-container {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
+display: flex;
+justify-content: center;
+gap: 1rem;
+margin-top: 1.5rem;
+flex-wrap: wrap;
 }
 
-/* Header bar inside the card */
 .conjugation-container h1 {
-    margin: -2rem -2rem 1.5rem -2rem;
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, #648f77, #4a7f67);
-    color: #ffffff;
-    font-size: 1.8rem;
-    font-weight: 700;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    text-align: left;
+margin: -2.5rem -2.5rem 2rem -2.5rem;
+padding: 1.5rem 2.5rem;
+background-color: var(--accent-primary);
+color: #ffffff;
+font-size: 1.6rem;
+font-weight: 500;
+border-top-left-radius: 24px;
+border-top-right-radius: 24px;
 }
 
-/* Score */
-.conjuation-container p {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: #333333;
+.conjugation-container p {
+font-size: 1rem;
+color: var(--text-muted);
+margin-bottom: 1rem;
 }
 
-/* Answer box */
 .answer-box {
-    width: 100%;
-    min-height: 100px;
-    margin-top: 1rem;
-    padding: 1rem;
-    font-size: 1rem;
-    border: 1px solid #cccccc;
-    border-radius: 12px;
-    background-color: #fdfdfd;
-    resize: vertical;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+width: 100%;
+min-height: 110px;
+margin-top: 2rem;
+padding: 1.2rem;
+font-size: 1rem;
+border-radius: 16px;
+background-color: #F6F3EC;
+border: 1px solid rgba(0, 0, 0, 0.08);
+resize: vertical;
+font-family: inherit;
 }
 
 .answer-box:focus {
-    border-color: #648f77;
-    box-shadow: 0 0 8px rgba(100, 143, 119, 0.4);
-    outline: none;
+outline: none;
+border-color: var(--accent-primary);
+box-shadow: 0 0 0 3px rgba(124, 138, 122, 0.25);
 }
 
-/* Buttons - general style */
+
 button {
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    font-weight: 600;
-    padding: 0.65rem 1.8rem;
-    font-size: 1rem;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.25s ease-in-out;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+font-family: inherit;
+font-weight: 500;
+padding: 0.6rem 1.6rem;
+font-size: 0.95rem;
+border-radius: 999px;
+border: none;
+cursor: pointer;
+background-color: var(--accent-primary);
+color: #ffffff;
+transition: opacity 0.2s ease;
 }
 
-/* Start button */
-.start-button {
-    background: linear-gradient(135deg, #678167, #37493a);
-    color: #fff;
+button:hover {
+opacity: 0.9;
 }
 
-.start-button:hover {
-    background: linear-gradient(135deg, #354537, #243426);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Check / Next button */
-.check-button {
-    background: linear-gradient(135deg, #678167, #37493a);
-    color: #fff;
-}
-
-.check-button:hover {
-    background: linear-gradient(135deg, #354537, #243426);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* End button */
 .end-button {
-    background: linear-gradient(135deg, #762121, #d64545);
-    color: #fff;
+background-color: transparent;
+color: var(--text-muted);
 }
 
-.end-button:hover {
-    background: linear-gradient(135deg, #d64545, #a32f2f);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Hint button */
-.hint-button {
-    background: linear-gradient(135deg, #678167, #37493a);
-    color: #fff;
-}
-
-.hint-button:hover {
-    background: linear-gradient(135deg, #354537, #243426);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Disabled button */
 button:disabled {
-    background: #cccccc !important;
-    color: #666666 !important;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+background-color: #D6D3CB;
+color: #8A857C;
+cursor: not-allowed;
+opacity: 1;
 }
 
-/* Feedback messages */
 .feedback {
-    margin-top: 1rem;
-    font-size: 1.2rem;
-    font-weight: 600;
+margin-top: 1.2rem;
+font-size: 1.1rem;
+font-weight: 500;
 }
 
 .correct {
-    color: #3c9d60;
+color: var(--accent-primary);
 }
 
 .incorrect {
-    color: #d64545;
+color: #9A7F6A; 
 }
 
-/* Final score / game over */
 .final-score-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 2rem;
-    border-radius: 16px;
-    background: #ffffff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    font-family: 'Segoe UI', Roboto, sans-serif;
+max-width: 600px;
+margin: 2.5rem auto;
+padding: 2.5rem;
+border-radius: 24px;
+background-color: var(--card-bg);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+text-align: center;
+font-family: inherit;
 }
 
 .final-score {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333333;
+font-size: 1.4rem;
+font-weight: 500;
+color: var(--text-main);
 }
 
 .end-message {
-    margin: 0.5rem 0 1.5rem;
-    font-size: 1.1rem;
-    color: #d64545;
+margin-top: 0.5rem;
+font-size: 1rem;
+color: var(--text-muted);
 }
-
-/* Blazored modal buttons */
-.blazored-modal-footer button {
-    border: 2px solid #000000 !important; 
-    border-radius: 8px;
-    background-color: #ffffff;           
-    color: #000000;                        
-    padding: 0.5rem 1rem;
-}
-
-.blazored-modal-footer button:hover {
-    border-color: #648f77;                 
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
 </style>

@@ -21,41 +21,27 @@
 </div>
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-
-    private string selectedList;
     private List<string> conjugationLists = new();
 
+    private string selectedList = "All";
 
-    protected override void OnInitialized()
-    {
-        string dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data/Conjugation");
-
-        if (Directory.Exists(dataPath))
-        {
-            conjugationLists = Directory.GetFiles(dataPath, "*.json")
-                                  .Select(file => Path.GetFileNameWithoutExtension(file))
-                                  .ToList();
-
-            selectedList = conjugationLists.FirstOrDefault(); // default selected
-        }
-        else
-        {
-            conjugationLists.Add("No Lists Found");
-            selectedList = conjugationLists[0];
-        }
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        if(!firstRender)return;
+        conjugationLists = new List<string> {"All"};
+        selectedList = conjugationLists.FirstOrDefault() ?? "All";
+        StateHasChanged();
     }
-
-    private void ApplyOptions()
+    private async Task ApplyOptions()
     {
         var result = new ConjugationOptions
         {
             SelectedList = selectedList
         };
 
-        BlazoredModal.CloseAsync(ModalResult.Ok(result));
+        await BlazoredModal.CloseAsync(ModalResult.Ok(result));
     }
 
-    private void Cancel() => BlazoredModal.CancelAsync();
+    private async Task Cancel() => BlazoredModal.CancelAsync();
 
     public class ConjugationOptions
     {

@@ -3,8 +3,8 @@
 @rendermode InteractiveServer
 @inject UserState userState
 <PageTitle>Home</PageTitle>
-
-<h1>Hello, world!</h1>
+<div class="page-content">
+<h1>Welcome to TechnoBabble!</h1>
 @if(userState.CurrentUser != null){
     <p> Welcome, @userState.CurrentUser.Username!</p>
 }
@@ -12,7 +12,8 @@
 <button class ="btn btn-primary" @onclick ="GoToLeaderboard"> Leaderboard</button>
 <button class ="btn btn-primary" @onclick ="GoToLoginPage"> Login</button>
 <button class ="btn btn-primary" @onclick ="GoToRegisterPage"> Register</button>
-<p> Welcome to my NEA :) please login to save your progress</p>
+<p> please login to save your progress</p>
+</div>
 @code {
     private void GoToLeaderboard(){
         NavMan.NavigateTo("/leaderboard");
@@ -25,3 +26,20 @@
     }
 
 }
+<style>
+.main{
+    padding 2rem;
+    background-color: var(--bg-main);
+
+}
+.page-content{
+    background-color: var(--card-bg);
+    padding: 3rem;
+    border-radius:24px;
+    max-width:780px;
+    margin:4rem auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+
+}
+</style>

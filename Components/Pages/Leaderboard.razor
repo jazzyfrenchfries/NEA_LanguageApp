@@ -57,8 +57,8 @@ else{
 /* Style the table */
 .leaderboard-table {
     border-collapse: collapse;
-    width: 60%; /* table width */
-    max-width: 600px;
+    width: 100%; /* table width */
+    max-width: 700px;
     background-color: #f9f9f9;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
@@ -67,7 +67,7 @@ else{
 
 /* Table header */
 .leaderboard-table th {
-    background-color: #4CAF50;
+    background-color: var(--text-muted);
     color: white;
     padding: 12px;
     text-align: center;
@@ -83,7 +83,7 @@ else{
 
 /* Hover effect for rows */
 .leaderboard-table tr:hover {
-    background-color: #f1f1f1;
+    background-color: var(--text-main);
 }
 
 /* Optional: alternate row colors */
