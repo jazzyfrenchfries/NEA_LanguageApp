@@ -10,7 +10,7 @@
 
 <PageTitle>Login</PageTitle>
 <InputText @bind-Value="username" placeholder="Username"/>
-<InputText @bind-Value="password" placeholder="Username"/>
+<InputText @bind-Value="password" type="password" placeholder="Username"/>
 <button type="button"@onclick="LoginUser">Login</button>
 <button type="button" @onclick="Cancel">Cancel</button>
 <p>@error</p>
