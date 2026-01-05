@@ -7,14 +7,24 @@
 @inject DatabaseService Db
 @inject NavigationManager NavMenu
 @inject UserState userState
-
 <PageTitle>Login</PageTitle>
+<div class="content-container">
+<h1>Login.</h1>
+<div class="page-center">
+<p> Please Login here to save your progress.</p>
+<div class="login-input"
 <InputText @bind-Value="username" placeholder="Username"/>
-<InputText @bind-Value="password" type="password" placeholder="Username"/>
-<button type="button"@onclick="LoginUser">Login</button>
-<button type="button" @onclick="Cancel">Cancel</button>
+</div>
+<div class="login-input">
+<InputText @bind-Value="password" type="password" placeholder="Password"/>
+</div>
+<div class="login-buttons">
+<button  class ="btn btn-primary"@onclick="LoginUser">Login</button>
+<button  class ="btn btn-primary" @onclick="Cancel">Cancel</button>
+</div>
 <p>@error</p>
-
+</div>
+</div>
 @code{
     [Inject] ILocalStorageService storageService { get; set;}
     private string error;
@@ -39,3 +49,66 @@
         NavMenu.NavigateTo("/");
     }
 }
+<style>
+.main{
+    padding 2rem;
+    background-color: var(--bg-main);
+
+}
+.page-content{
+    background-color: var(--card-bg);
+    padding: 3rem;
+    border-radius:18px;
+    max-width:780px;
+    width: 100%;
+    margin:4rem auto;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+
+}
+.page-center{
+    min-height: 70vh;
+    align-items:center;
+    justify-content: center;
+    padding: 1rem;
+}
+.content-container {
+max-width: 850px;
+margin: 2.5rem auto;
+padding: 2.5rem;
+border-radius: 24px;
+background: var(--card-bg);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+
+.content-container h1 {
+margin: -2.5rem -2.5rem 2rem -2.5rem;
+padding: 1.5rem 2.5rem;
+background-color: var(--accent-primary);
+color: #ffffff;
+font-size: 1.6rem;
+font-weight: 500;
+border-top-left-radius: 24px;
+border-top-right-radius: 24px;
+}
+
+.content-container p {
+font-size: 1rem;
+color: var(--text-muted);
+margin-bottom: 1rem;
+}
+.login-input{
+    width:100%;
+    max-width:320px;
+    padding:0.6rem;
+
+}
+.login-buttons{
+    display: flex;
+    gap:1rem;
+    margin-top:0.5rem;
+
+}
+</style>
