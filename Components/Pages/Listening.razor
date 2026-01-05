@@ -23,6 +23,7 @@ else if (UserState.CurrentUser == null)
 }
 else if (!isPlaying)
 {
+    <div class="listening-container">
     <h1>Listening Game</h1>
     <p>Test your listening skills! Click start to begin.</p>
 
@@ -31,6 +32,7 @@ else if (!isPlaying)
     </div>
 
     <p>Logged in as <strong>@UserState.CurrentUser.Username</strong></p>
+    </div>
 }
 else
 {

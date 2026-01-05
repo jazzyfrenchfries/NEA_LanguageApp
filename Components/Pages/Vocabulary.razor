@@ -12,6 +12,7 @@
 
 @if (!isPlaying)
 {
+    <div class="vocabulary-container">
     <h1>Vocabulary Game</h1>
     <p>Test your vocabulary skills! Click the button below to start.</p>
     <div class="centered-container">
@@ -23,6 +24,7 @@
     {
         <p>Logged in as <strong>@userState.CurrentUser.Username</strong></p>
     }
+    </div>
 
 }
 else
@@ -215,7 +217,7 @@ border-top-left-radius: 24px;
 border-top-right-radius: 24px;
 }
 
-.listening-container p {
+.vocabulary-container p {
 font-size: 1rem;
 color: var(--text-muted);
 margin-bottom: 1rem;

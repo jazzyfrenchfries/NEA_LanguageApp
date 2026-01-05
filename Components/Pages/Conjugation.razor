@@ -22,6 +22,7 @@
 }
 else if (!isPlaying)
 {
+    <div class="conjugation-container">
     <h1>Conjugation Game</h1>
     <p>Test your conjugation skills! Click the button below to start.</p>
 
@@ -29,12 +30,14 @@ else if (!isPlaying)
         <button class="start-button" @onclick="StartConjugation">Start</button>
         <button class="options-button" @onclick="GameOptions">Options</button>
     </div>
-
+    
     @if (UserState.CurrentUser != null)
     {
         <p>Logged in as <strong>@UserState.CurrentUser.Username</strong></p>
     }
+    </div>
 }
+
 else
 {
     <div class="conjugation-container">

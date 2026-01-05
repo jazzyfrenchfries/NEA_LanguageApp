@@ -210,12 +210,36 @@ public class DatabaseService
         using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            list.Add(new User {
+            list.Add(new User
+            {
                 UserID = reader.GetInt32(0),
                 Username = reader.GetString(1),
                 TotalScore = reader.GetInt32(2)
             });
         }
         return list;
+    }
+        public async Task <bool> ChangePassword(string username,string OldPassword, string newPassword){
+        // Hash passwords (you already said you have this set up)
+        var oldHash = HashPassword(OldPassword);
+        var newHash = HashPassword(newPassword);
+        using var connection = new SqlConnection(_conn);
+        await connection.OpenAsync();
+        var checkCommand = new SqlCommand(
+            "SELECT COUNT(*) FROM Users WHERE Username= @u AND PasswordHash = @p",connection
+        );
+        checkCommand.Parameters.AddWithValue("@u", username);
+        checkCommand.Parameters.AddWithValue(@"p",oldHash);
+        int match = (int) await checkCommand.ExecuteScalarAsync();
+        if(match == 0){
+            return false;
+        
+        }
+        var updateCommand = new SqlCommand("UPDATE Users SET PasswordHash = @newP WHERE Username = @u", connection);
+        updateCommand.Parameters.AddWithValue("@newP", newHash);
+        updateCommand.Parameters.AddWithValue("@u", username);
+        await updateCommand.ExecuteNonQueryAsync();
+        return true;
+        
     }
 }

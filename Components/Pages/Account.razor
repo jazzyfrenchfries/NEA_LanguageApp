@@ -1,23 +1,81 @@
 @page "/Account"
 @rendermode InteractiveServer
 @using Blazored.LocalStorage
+@using Microsoft.Data.SqlClient
 @using NEA.Components.Layout
 @using System.Threading.Tasks
+@using Blazored.LocalStorage.StorageOptions
+
+@inject DatabaseService Db
 @inject NavigationManager NavMenu
 @inject ILocalStorageService LocalStorage
 @inject UserState userState
 <PageTitle>Account</PageTitle>
-<h1>Account Page</h1>
-<h2>Welcome to your account page!</h2>
-@if (userState.CurrentUser == null){
-    <p> You are not logged in </p>
-    <button @onclick="GoToLogin">Login</button>
-}
-else{
-    <p> Logged in as <strong>@userState.CurrentUser.Username</strong></p>
-    <button type="button" @onclick="LogoutUser">Logout</button>
-}
+<div class="account-container">
+    <h1>Account Page</h1>
+    <h2>Welcome to your account page!</h2>
+
+    @if (userState.CurrentUser == null)
+    {
+        <p>You are not logged in</p>
+        <button class="btn btn-primary" @onclick="GoToLogin">Login</button>
+    }
+    else
+    {
+        <p>Logged in as <strong>@userState.CurrentUser.Username</strong></p>
+
+        <h3>Change password</h3>
+
+        <div class="login-input">
+            <InputText @bind-Value="currentPassword"
+                       type="password"
+                       placeholder="Current Password" />
+        </div>
+
+        <div class="login-input">
+            <InputText @bind-Value="newPassword"
+                       type="password"
+                       placeholder="New Password" />
+        </div>
+
+        <button class="btn btn-primary" @onclick="HandleChangePassword">
+            Change Password
+        </button>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p>@message</p>
+        }
+
+        <button class="btn btn-primary" @onclick="LogoutUser">
+            Logout
+        </button>
+    }
+</div>
 @code{
+     private string newPassword;
+     private string currentPassword;
+     private string currentUser;
+    private string password;
+    private string message;
+
+    private async Task HandleChangePassword()
+    {
+        if(string.IsNullOrWhiteSpace(currentPassword) || 
+            string.IsNullOrWhiteSpace(newPassword)){
+            message = "Please fill in all password fields";
+            return;
+        }
+
+        bool success = await Db.ChangePassword(
+            userState.CurrentUser.Username,
+            currentPassword,
+            newPassword);
+
+        message = success
+            ? "Password changed successfully"
+            : "Current password is incorrect";
+    }
         protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -33,6 +91,7 @@ else{
         StateHasChanged();
     }
 
+
     private async Task LogoutUser(){
         await LocalStorage.RemoveItemAsync("currentUser");
         userState.ClearUser();
@@ -42,3 +101,40 @@ else{
         NavMenu.NavigateTo("/login");
     }
 }
+}
+<style>
+.account-container {
+max-width: 850px;
+margin: 2.5rem auto;
+padding: 2.5rem;
+border-radius: 24px;
+background: var(--card-bg);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.centered-container {
+display: flex;
+justify-content: center;
+gap: 1rem;
+margin-top: 1.5rem;
+flex-wrap: wrap;
+}
+
+.account-container h1 {
+margin: -2.5rem -2.5rem 2rem -2.5rem;
+padding: 1.5rem 2.5rem;
+background-color: var(--accent-primary);
+color: #ffffff;
+font-size: 1.6rem;
+font-weight: 500;
+border-top-left-radius: 24px;
+border-top-right-radius: 24px;
+}
+
+.account-container p {
+font-size: 1rem;
+color: var(--text-muted);
+margin-bottom: 1rem;
+}
+</style>
