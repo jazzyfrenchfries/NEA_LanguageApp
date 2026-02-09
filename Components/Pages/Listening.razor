@@ -4,6 +4,9 @@
 @using Blazored.LocalStorage
 @using Blazored.Modal
 @using Blazored.Modal.Services
+@using BootstrapBlazor.Components
+@using Microsoft.Extensions.Options
+@using NEA.Components.Layout
 
 @inject DatabaseService Db
 @inject NavigationManager NavMenu
@@ -29,6 +32,7 @@ else if (!isPlaying)
 
     <div class="centered-container">
         <button class="start-button" @onclick="StartListening">Start</button>
+        <button class="options-button" @onclick="GameOptions">Options</button>
     </div>
 
     <p>Logged in as <strong>@UserState.CurrentUser.Username</strong></p>
@@ -102,6 +106,15 @@ else
 
     private List<ListeningItem> items = new();
 
+    private async Task GameOptions()
+    {
+        var modal = ModalService.Show<OptionsModalListening>("Game Options");
+        var result =await modal.Result;
+        if(!result.Cancelled){
+            var options = (OptionsModalListening.ListeningOptions)result.Data;
+        }
+    }
+
     private ListeningItem? CurrentItem =>
         items.FirstOrDefault(i => i.ListeningID == currentKey);
 
@@ -109,7 +122,7 @@ else
     {
         if (!firstRender) return;
 
-        // Load user from LocalStorage AFTER JS is ready
+        
         var user = await LocalStorage.GetItemAsync<User>("currentUser");
 
         if (user == null)
@@ -120,7 +133,7 @@ else
 
         UserState.SetUser(user);
 
-        // Load listening items from DB
+       
         items = await Db.GetListeningsAsync();
 
         isLoaded = true;

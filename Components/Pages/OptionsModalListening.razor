@@ -1,0 +1,91 @@
+@inject Blazored.Modal.Services.IModalService ModalService
+@using Blazored.Modal
+
+<div class="options-modal">
+    <h2>Conjugation Options</h2>
+
+    <div class="option-group">
+        <label>Select Listening List:</label>
+        <select @bind="selectedList" class="options-select">
+            @foreach (var list in listeningLists)
+            {
+                <option value="@list">@list</option>
+            }
+        </select>
+    </div>
+
+    <div class="options-buttons">
+        <button class="check-button" @onclick="ApplyOptions">Apply</button>
+        <button class="end-button" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    private List<string> listeningLists = new();
+
+    private string selectedList = "All";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        if(!firstRender)return;
+        listeningLists = new List<string> {"All"};
+        selectedList = listeningLists.FirstOrDefault() ?? "All";
+        StateHasChanged();
+    }
+    private async Task ApplyOptions()
+    {
+        var result = new ListeningOptions
+        {
+            SelectedList = selectedList
+        };
+
+        await BlazoredModal.CloseAsync(ModalResult.Ok(result));
+    }
+
+    private async Task Cancel() => BlazoredModal.CancelAsync();
+
+    public class ListeningOptions
+    {
+        public string SelectedList { get; set; }
+    }
+}
+
+<style>
+.options-modal {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    max-width: 400px;
+}
+
+.options-modal h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #37493a;
+}
+
+.option-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.options-select {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.options-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.modal-dialog {
+    position: relative;
+    top: 20vh; 
+}
+
+</style>

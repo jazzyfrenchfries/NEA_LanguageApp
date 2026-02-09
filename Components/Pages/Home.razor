@@ -6,17 +6,16 @@
 <div class="content-container">
 <h1>Welcome to TechnoBabble!</h1>
 <div class="page-center">
+<h2> About Technobabble</h2>
+<p> Welcome to your new french learning app</p>
+<p>You can complete conjugation, vocabulary and listening exercises to earn points.</p>
+<p> Compete with other users to earn top place on the leaderboard!</p>
 @if(userState.CurrentUser != null){
     <p> Welcome, @userState.CurrentUser.Username!</p>
 }
 else{
     <p> please login to save your progress</p>
 }
-<h2> About Technobabble</h2>
-<p> Welcome to your new french learning app</p>
-<p>You can complete conjugation, vocabulary and listening exercises to earn points.</p>
-<p> Compete with other users to earn top place on the leaderboard!</p>
-
 
 <button class ="btn btn-primary" @onclick ="GoToLeaderboard"> Leaderboard</button>
 <button class ="btn btn-primary" @onclick ="GoToLoginPage"> Login</button>
