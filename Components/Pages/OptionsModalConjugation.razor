@@ -1,5 +1,8 @@
 @inject Blazored.Modal.Services.IModalService ModalService
 @using Blazored.Modal
+@using Microsoft.Extensions.Options
+
+@inject DatabaseService databaseService
 
 <div class="options-modal">
     <h2>Conjugation Options</h2>
@@ -20,17 +23,35 @@
     </div>
 </div>
 @code {
+    [Parameter] 
+    public ConjugationItem conjugationItem {get; set;}
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private List<string> conjugationLists = new();
-
+    private List<ConjugationItem> allItems = new List<ConjugationItem>();
     private string selectedList = "All";
-
-    protected override async Task OnAfterRenderAsync(bool firstRender){
-        if(!firstRender)return;
-        conjugationLists = new List<string> {"All"};
-        selectedList = conjugationLists.FirstOrDefault() ?? "All";
-        StateHasChanged();
+    
+    protected override async Task OnInitializedAsync(){
+        allItems = await databaseService.GetConjugationAsync();
+        AddOptionsToList();
     }
+    private  void OnParametersSet(){
+        conjugationLists.Clear();
+        conjugationLists.Add("All");
+        AddOptionsToList(); 
+        selectedList = conjugationLists.First();
+    }
+    private void AddOptionsToList(){
+        conjugationLists.Clear();
+        conjugationLists.Add("All");
+        conjugationLists.AddRange(allItems
+            .Where(x=> !string.IsNullOrEmpty(x.Options))
+            .Select(x => x.Options)
+            .Distinct());
+        selectedList= "All";
+    }
+    private List<ConjugationItem> FilteredQuestionSet =>
+    selectedList == "All"
+    ? allItems: allItems.Where(x=> x.Options == selectedList).ToList();
     private async Task ApplyOptions()
     {
         var result = new ConjugationOptions

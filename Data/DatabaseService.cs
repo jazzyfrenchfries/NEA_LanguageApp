@@ -135,28 +135,30 @@ public class DatabaseService
         var list = new List<ConjugationItem>();
         using var conn = new SqlConnection(_conn);
         using var cmd = new SqlCommand(
-            "SELECT ConjugationID, Verb , Pronoun,  Tense ,CorrectAnswer, Hint FROM ConjugationBank", conn
-        ); 
-            
-            await conn.OpenAsync();
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            "SELECT ConjugationID, Verb , Pronoun,  Tense ,CorrectAnswer, Hint, Options FROM ConjugationBank", conn
+        );
+
+        await conn.OpenAsync();
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            list.Add(new ConjugationItem
             {
-                list.Add(new ConjugationItem
-                {
-                    ConjugationID = reader.GetInt32(0),
-                    Verb = reader.GetString(1),
-                    Pronoun = reader.GetString(2),
-                    Tense = reader.GetString(3),
-                    CorectAnswer = reader.GetString(4),
-                    Hint = reader.GetString(5)
+                ConjugationID = reader.GetInt32(0),
+                Verb = reader.GetString(1),
+                Pronoun = reader.GetString(2),
+                Tense = reader.GetString(3),
+                CorectAnswer = reader.GetString(4),
+                Hint = reader.GetString(5),
+                Options = reader.GetString(6)
 
-                });
-            }
+            });
+        }
 
-        
+
         return list;
     }
+
 
     // Example: check login
     public async Task<User> GetUserByUsernameAsync(string username)
