@@ -103,12 +103,13 @@ else
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
 
-    private int score = 0;
+    private int score = 0, currentIndex = 0;
     private int currentKey;
     private string userAnswer = "";
     private string hint = "";
 
     private List<ConjugationItem> items = new();
+    private List<ConjugationItem> activeQuestions = new();
     private ConjugationItem? CurrentItem =>
         items.FirstOrDefault(i => i.ConjugationID == currentKey);
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -130,12 +131,14 @@ else
         StateHasChanged();
     }
 
+
+
     private void StartConjugation()
     {
-        if (items.Count == 0) return;
+        if (activeQuestions.Count == 0) return;
 
-        var item = items[Random.Shared.Next(items.Count)];
-        currentKey = item.ConjugationID;
+        var CurrentQuestion = activeQuestions[Random.Shared.Next(activeQuestions.Count)];
+        currentKey = CurrentQuestion.ConjugationID;
 
         isPlaying = true;
         iscorrect = false;
@@ -191,6 +194,14 @@ else
         isPlaying = false;
         score = 0;
     }
+    private void ApplyConjugationFilter(string selectedList){
+        activeQuestions = 
+        selectedList == "All"
+            ? items.ToList()
+            :items . Where(x => x.Options == selectedList)
+            .ToList();
+        currentIndex = 0;
+    }
 
     private async Task GameOptions()
     {
@@ -198,6 +209,7 @@ else
         var result =await modal.Result;
         if(!result.Cancelled){
             var options = (OptionsModalConjugation.ConjugationOptions)result.Data;
+            ApplyConjugationFilter(options.SelectedList);
         }
     }
 }

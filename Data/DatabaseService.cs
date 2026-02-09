@@ -160,7 +160,6 @@ public class DatabaseService
     }
 
 
-    // Example: check login
     public async Task<User> GetUserByUsernameAsync(string username)
     {
         using var conn = new SqlConnection(_conn);
