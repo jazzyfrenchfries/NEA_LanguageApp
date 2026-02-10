@@ -65,7 +65,7 @@ else
         }
 
         <div class="centered-container">
-            @if (!hasSubmitted|| !hasRevealed )
+            @if (!hasSubmitted && !hasRevealed )
             {
                 <button class="check-button" @onclick="CheckAnswer">Submit</button>
             }
@@ -77,7 +77,7 @@ else
             <button class="end-button" @onclick="EndGame">End</button>  
             @if(!isHintUsed && !hasSubmitted)
             {
-            <button class="hint-button" @onclick="UseHint">Hint 67</button>
+            <button class="hint-button" @onclick="UseHint">Hint </button>
             }
             @if(isHintUsed && !hasRevealed){
                 <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 

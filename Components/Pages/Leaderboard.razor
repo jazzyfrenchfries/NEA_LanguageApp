@@ -1,5 +1,6 @@
 @page "/leaderboard"
 @inject DatabaseService Db
+@using BootstrapBlazor.Components
 @using Microsoft.Data.SqlClient;
 
 <PageTitle>Leaderboard</PageTitle>
@@ -12,6 +13,12 @@
     <p>@System.Security.Principal.WindowsIdentity.GetCurrent().Name</p>
 }
 else{
+    <div class="leadeerboard-toggle">
+    <button @onclick="() => ChangeView('All')">Overall</button>
+    <button @onclick="() => ChangeView('Vocabulary')">Overall</button>
+    <button @onclick="() => ChangeView('Conjugation')">Overall</button>
+    <button @onclick="() => ChangeView('Listening')">Overall</button>
+    </div>
     <div class="leaderboard-container">
     <table class="leaderboard-table">
         <thead>
@@ -37,12 +44,27 @@ else{
 }
 @code{
     private List<User> users;
+    private List<User> leaderboard = new();
+
+    private string selectedView = "All";
     protected override async Task OnInitializedAsync(){
         try{
-            users = await Db.GetLeaderboardAsync(20);
+            users = await Db.GetOverallLeaderboardAsync(20);
         }
         catch(Exception ex){
-            Console.WriteLine("Error loading Leaderboard: " + ex);
+            
+        }
+    }
+    private async Task ChangeView(string view){
+        selectedView = view;
+        await LoadLeaderboard();
+    }
+    private async Task LoadLeaderboard(){
+        if(selectedView == "All"){
+            leaderboard = await Db.GetOverallLeaderboardAsync();
+        }
+        else{
+            leaderboard = await Db.GetExerciseLeaderboardAsync();
         }
     }
 }

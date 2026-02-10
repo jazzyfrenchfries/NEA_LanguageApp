@@ -86,7 +86,7 @@ public class DatabaseService
         using (var conn = new SqlConnection(_conn))
         using (var cmd = conn.CreateCommand())
         {
-            cmd.CommandText = "SELECT VocabID, FrenchWord, Translation, Hint FROM VocabularyBank";
+            cmd.CommandText = "SELECT VocabID, FrenchWord, Translation, Hint, Options FROM VocabularyBank";
             await conn.OpenAsync();
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -95,8 +95,9 @@ public class DatabaseService
                 {
                     VocabID = reader.GetInt32(0),
                     FrenchWord = reader.GetString(1),
-                    Translation = reader.IsDBNull(2) ? null : reader.GetString(2),
-                    Hint = reader.IsDBNull(3) ? null : reader.GetString(3)
+                    Translation = reader.GetString(2),
+                    Hint =  reader.GetString(3),
+                    Options = reader.GetString(4)
                 });
             }
         }
@@ -179,7 +180,6 @@ public class DatabaseService
         return null;
     }
 
-    // Example: save a user score
     public async Task SaveUserScoreAsync(int userId, string exerciseType, int exerciseId, int score, bool correct)
     {
         using var conn = new SqlConnection(_conn);
@@ -199,8 +199,7 @@ public class DatabaseService
         await cmd.ExecuteNonQueryAsync();
     }
 
-    // Example: get leaderboard (top N)
-    public async Task<List<User>> GetLeaderboardAsync(int topN = 20)
+    public async Task<List<User>> GetOverallLeaderboardAsync(int topN = 20)
     {
         var list = new List<User>();
         using var conn = new SqlConnection(_conn);
@@ -220,27 +219,51 @@ public class DatabaseService
         }
         return list;
     }
-        public async Task <bool> ChangePassword(string username,string OldPassword, string newPassword){
-        // Hash passwords (you already said you have this set up)
-        var oldHash = HashPassword(OldPassword);
-        var newHash = HashPassword(newPassword);
-        using var connection = new SqlConnection(_conn);
-        await connection.OpenAsync();
-        var checkCommand = new SqlCommand(
-            "SELECT COUNT(*) FROM Users WHERE Username= @u AND PasswordHash = @p",connection
-        );
-        checkCommand.Parameters.AddWithValue("@u", username);
-        checkCommand.Parameters.AddWithValue(@"p",oldHash);
-        int match = (int) await checkCommand.ExecuteScalarAsync();
-        if(match == 0){
-            return false;
-        
+    public async Task<List<User>> GetExerciseLeaderboardAsync()
+    {
+         var list = new List<User>();
+        using var conn = new SqlConnection(_conn);
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = @"SELECT u.Username, SUM(TotalScore) As ExerciseScore
+        From Scores s
+        JOIN Users u on u.UserID = s.UserID
+        WHERE s.ExerciseType = @Type
+        GROUP BY u.Username
+         ORDER BY ExerciseScore DESC";
+        cmd.Parameters.AddWithValue("@Type", ExerciseType);
+
+        await conn.OpenAsync();
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            list.Add(new User
+            {
+                UserID = reader.GetInt32(0),
+                Username = reader.GetString(1),
+                TotalScore = reader.GetInt32(2)
+            });
         }
-        var updateCommand = new SqlCommand("UPDATE Users SET PasswordHash = @newP WHERE Username = @u", connection);
-        updateCommand.Parameters.AddWithValue("@newP", newHash);
-        updateCommand.Parameters.AddWithValue("@u", username);
-        await updateCommand.ExecuteNonQueryAsync();
-        return true;
+        return list;
+    }
+        public async Task <bool> ChangePassword(string username,string OldPassword, string newPassword){
+            var oldHash = HashPassword(OldPassword);
+            var newHash = HashPassword(newPassword);
+            using var connection = new SqlConnection(_conn);
+            await connection.OpenAsync();
+            var checkCommand = new SqlCommand(
+             "SELECT COUNT(*) FROM Users WHERE Username= @u AND PasswordHash = @p",connection
+            );
+            checkCommand.Parameters.AddWithValue("@u", username);
+            checkCommand.Parameters.AddWithValue(@"p",oldHash);
+            int match = (int) await checkCommand.ExecuteScalarAsync();
+            if(match == 0){
+                return false;
+            }
+            var updateCommand = new SqlCommand("UPDATE Users SET PasswordHash = @newP WHERE Username = @u", connection);
+            updateCommand.Parameters.AddWithValue("@newP", newHash);
+            updateCommand.Parameters.AddWithValue("@u", username);
+            await updateCommand.ExecuteNonQueryAsync();
+            return true;
         
     }
 }
