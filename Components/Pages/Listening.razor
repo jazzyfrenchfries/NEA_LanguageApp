@@ -66,28 +66,37 @@ else
             class="answer-box">
         </textarea>
 
-        @if (hasSubmitted)
+       @if (hasSubmitted)
         {
-            <p class="@(iscorrect ? "correct" : "incorrect")">
-                @(iscorrect ? "Correct!" : "Incorrect")
-            </p>
+            <div class="feedback">
+                @if (iscorrect)
+                {
+                    <span class="correct">Correct! Click "Next Question" to continue.</span>
+                }
+                else
+                {
+                    <span class="incorrect">Incorrect! The correct answer is: @CurrentItem?.CorrectAnswer</span>
+                }
+            </div>
         }
 
         <div class="centered-container">
-            @if (!iscorrect)
+            @if (!hasSubmitted|| !hasRevealed )
             {
-                <button @onclick="CheckAnswer">Submit</button>
+                <button class="check-button" @onclick="CheckAnswer">Submit</button>
             }
-            else
+            @if(hasSubmitted || hasRevealed)
             {
-                <button @onclick="NextQuestion">Next Question</button>
+                <button class="check-button" @onclick="NextQuestion">Next Question</button>
             }
 
-            <button @onclick="EndGame">End</button>
-
-            @if (!isHintUsed)
+            <button class="end-button" @onclick="EndGame">End</button>  
+            @if(!isHintUsed && !hasSubmitted)
             {
-                <button @onclick="UseHint">Hint</button>
+            <button class="hint-button" @onclick="UseHint">Hint</button>
+            }
+            @if(isHintUsed && !hasRevealed){
+                <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 
             }
         </div>
     </div>
@@ -98,6 +107,7 @@ else
     private bool iscorrect = false;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
+    private bool hasRevealed = false;
 
     private int score = 0;
     private int currentKey, currentIndex = 0;
@@ -158,6 +168,7 @@ else
         iscorrect = false;
         hasSubmitted = false;
         isHintUsed = false;
+        hasRevealed = false;
         userAnswer = "";
     }
 
@@ -186,6 +197,13 @@ else
             UserState.CurrentUser.TotalScore += 1;
             await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
         }
+    }
+     private async Task ShowAnswer(){
+        hasRevealed = true; 
+        hasSubmitted = true;
+        iscorrect = false;
+        showAnswer = CurrentItem.CorrectAnswer;
+        
     }
 
     private void NextQuestion()

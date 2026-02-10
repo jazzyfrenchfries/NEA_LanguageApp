@@ -62,16 +62,16 @@ else
                placeholder="Type your answer..."
                disabled="@iscorrect" />
 
-        @if (hasSubmitted)
+       @if (hasSubmitted)
         {
             <div class="feedback">
                 @if (iscorrect)
                 {
-                    <span class="correct">Correct!</span>
+                    <span class="correct">Correct! Click "Next Question" to continue.</span>
                 }
                 else
                 {
-                    <span class="incorrect">Incorrect</span>
+                    <span class="incorrect">Incorrect! The correct answer is: @CurrentItem?.CorectAnswer</span>
                 }
             </div>
         }
@@ -92,8 +92,8 @@ else
             {
                 <button class="hint-button" @onclick="UseHint">Hint</button>
             }
-            @if(!isHintUsed && iscorrect){
-                <button class="answer-button" @onclick ="ShowAnswer">Reveal</button> 
+            @if(isHintUsed){
+                <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 
             }
         </div>
     </div>
@@ -105,7 +105,7 @@ else
     private bool iscorrect = false;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
-
+    private bool hasRevealed = false;
     private int score , currentIndex = 0 ;
     private int currentKey;
     private string userAnswer;
@@ -148,13 +148,16 @@ else
         iscorrect = false;
         hasSubmitted = false;
         isHintUsed = false;
+        hasRevealed = false;
         userAnswer = "";
         hint = "";
         showAnswer = "";
     }
-    private async Task ShowAnswer(){
+     private async Task ShowAnswer(){
+        hasRevealed = true; 
+        hasSubmitted = true;
+        iscorrect = false;
         showAnswer = CurrentItem.CorectAnswer;
-        NextQuestion();
     }
     private async Task CheckAnswer()
     {
