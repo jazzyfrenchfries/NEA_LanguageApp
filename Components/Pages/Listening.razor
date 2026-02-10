@@ -100,11 +100,15 @@ else
     private bool isHintUsed = false;
 
     private int score = 0;
-    private int currentKey;
+    private int currentKey, currentIndex = 0;
 
     private string userAnswer = "";
+     private string hint, showAnswer;
 
     private List<ListeningItem> items = new();
+    private List<ListeningItem> activeQuestions = new();
+    private ListeningItem? CurrentItem =>
+        items.FirstOrDefault(i => i.ListeningID == currentKey);
 
     private async Task GameOptions()
     {
@@ -114,10 +118,6 @@ else
             var options = (OptionsModalListening.ListeningOptions)result.Data;
         }
     }
-
-    private ListeningItem? CurrentItem =>
-        items.FirstOrDefault(i => i.ListeningID == currentKey);
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -134,12 +134,19 @@ else
         UserState.SetUser(user);
 
        
-        items = await Db.GetListeningsAsync();
-
+       items = await Db.GetListeningAsync();
+        ApplyListeningFilter("All");
         isLoaded = true;
         StateHasChanged();
     }
-
+    private void ApplyListeningFilter(string selectedList){
+        activeQuestions = 
+        selectedList == "All"
+            ? items.ToList()
+            :items . Where(x => x.Options == selectedList)
+            .ToList();
+        currentIndex = 0;
+    }
     private void StartListening()
     {
         if (items.Count == 0) return;

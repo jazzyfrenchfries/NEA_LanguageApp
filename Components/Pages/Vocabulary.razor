@@ -94,6 +94,9 @@ else
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
     int totalCompleted = 0;
+     private string showAnswer;
+
+    private List<VocabItem> activeQuestions = new();
     private List<VocabItem> items = new();
     private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentkey);
     private static readonly Random random = new();
@@ -118,7 +121,7 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
 private VocabItem? GetRandomItem()
 {
     if (items == null || items.Count == 0)
-        return null; // nothing to pick
+        return null;
 
     return items[random.Next(items.Count)];
 }
@@ -176,7 +179,7 @@ private VocabItem? GetRandomItem()
 
     if (!result.Cancelled)
     {
-        var options = (OptionsModalVocab.VocabOptions)result.Data;
+        var options = (OptionsModalVocab.VocabularyOptions)result.Data;
         
     }
 }

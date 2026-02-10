@@ -1,5 +1,8 @@
 @inject Blazored.Modal.Services.IModalService ModalService
 @using Blazored.Modal
+@using Microsoft.Extensions.Options
+
+@inject DatabaseService databaseService
 
 <div class="options-modal">
     <h2>Vocabulary Options</h2>
@@ -7,7 +10,10 @@
     <div class="option-group">
         <label>Select Vocabulary List:</label>
         <select @bind="selectedList" class="options-select">
-            <option value="All">All Vocabulary</option>
+            @foreach (var list in VocabLists)
+            {
+                <option value="@list">@list</option>
+            }
         </select>
     </div>
 
@@ -16,22 +22,39 @@
         <button class="end-button" @onclick="Cancel">Cancel</button>
     </div>
 </div>
-
 @code {
+    [Parameter] 
+    public VocabItem vocabItem {get; set;}
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-
-    private string selectedList = "All"; 
-    private List<string> vocabLists = new();
-
-    protected override async Task OnAfterRenderAsync(bool firstRender){
-        if(!firstRender)return;
-        vocabLists = new List<string> {"All"};
-        selectedList = vocabLists.FirstOrDefault() ?? "All";
-        StateHasChanged();
+    private List<string> VocabLists = new();
+    private List<VocabItem> allItems = new List<VocabItem>();
+    private string selectedList = "All";
+    
+    protected override async Task OnInitializedAsync(){
+        allItems = await databaseService. GetVocabularyAsync();
+        AddOptionsToList();
     }
+    private  void OnParametersSet(){
+        VocabLists.Clear();
+        VocabLists.Add("All");
+        AddOptionsToList(); 
+        selectedList = VocabLists.First();
+    }
+    private void AddOptionsToList(){
+        VocabLists.Clear();
+        VocabLists.Add("All");
+        VocabLists.AddRange(allItems
+            .Where(x=> !string.IsNullOrEmpty(x.Options))
+            .Select(x => x.Options)
+            .Distinct());
+        selectedList= "All";
+    }
+    private List<VocabItem> FilteredQuestionSet =>
+    selectedList == "All"
+    ? allItems: allItems.Where( x=> x.Options == selectedList).ToList();
     private async Task ApplyOptions()
     {
-        var result = new VocabOptions
+        var result = new VocabularyOptions
         {
             SelectedList = selectedList
         };
@@ -41,7 +64,7 @@
 
     private async Task Cancel() => BlazoredModal.CancelAsync();
 
-    public class VocabOptions
+    public class VocabularyOptions
     {
         public string SelectedList { get; set; }
     }

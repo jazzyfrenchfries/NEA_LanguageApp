@@ -1,13 +1,16 @@
 @inject Blazored.Modal.Services.IModalService ModalService
 @using Blazored.Modal
+@using Microsoft.Extensions.Options
+
+@inject DatabaseService databaseService
 
 <div class="options-modal">
-    <h2>Conjugation Options</h2>
+    <h2>Listening Options</h2>
 
     <div class="option-group">
         <label>Select Listening List:</label>
         <select @bind="selectedList" class="options-select">
-            @foreach (var list in listeningLists)
+            @foreach (var list in ListeningLists)
             {
                 <option value="@list">@list</option>
             }
@@ -20,17 +23,35 @@
     </div>
 </div>
 @code {
+    [Parameter] 
+    public ListeningItem listeningItem {get; set;}
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    private List<string> listeningLists = new();
-
+    private List<string> ListeningLists = new();
+    private List<ListeningItem> allItems = new List<ListeningItem>();
     private string selectedList = "All";
-
-    protected override async Task OnAfterRenderAsync(bool firstRender){
-        if(!firstRender)return;
-        listeningLists = new List<string> {"All"};
-        selectedList = listeningLists.FirstOrDefault() ?? "All";
-        StateHasChanged();
+    
+    protected override async Task OnInitializedAsync(){
+        allItems = await databaseService. GetListeningAsync();
+        AddOptionsToList();
     }
+    private  void OnParametersSet(){
+        ListeningLists.Clear();
+        ListeningLists.Add("All");
+        AddOptionsToList(); 
+        selectedList = ListeningLists.First();
+    }
+    private void AddOptionsToList(){
+        ListeningLists.Clear();
+        ListeningLists.Add("All");
+        ListeningLists.AddRange(allItems
+            .Where(x=> !string.IsNullOrEmpty(x.Options))
+            .Select(x => x.Options)
+            .Distinct());
+        selectedList= "All";
+    }
+    private List<ListeningItem> FilteredQuestionSet =>
+    selectedList == "All"
+    ? allItems: allItems.Where( x=> x.Options == selectedList).ToList();
     private async Task ApplyOptions()
     {
         var result = new ListeningOptions
@@ -48,6 +69,7 @@
         public string SelectedList { get; set; }
     }
 }
+
 
 <style>
 .options-modal {

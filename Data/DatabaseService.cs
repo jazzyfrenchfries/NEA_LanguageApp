@@ -103,33 +103,6 @@ public class DatabaseService
 
         return list;
     }
-
-    public async Task<List<ListeningItem>> GetListeningsAsync()
-    {
-        var list = new List<ListeningItem>();
-        using var conn = new SqlConnection(_conn);
-        using var cmd = new SqlCommand(
-            "SELECT ListeningID, AudioPath, CorrectAnswer, FullText, Hint FROM ListeningBank", conn
-        );
-
-        await conn.OpenAsync();
-        using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            list.Add(new ListeningItem
-            {
-                ListeningID = reader.GetInt32(0),
-                AudioPath = reader.GetString(1),
-                CorrectAnswer = reader.GetString(2),
-                FullText = reader.GetString(3),
-                Hint = reader.GetString(4)
-
-            });
-        }
-
-
-        return list;
-    }
     public async Task<List<ConjugationItem>> GetConjugationAsync()
     {
         var list = new List<ConjugationItem>();
@@ -151,6 +124,33 @@ public class DatabaseService
                 CorectAnswer = reader.GetString(4),
                 Hint = reader.GetString(5),
                 Options = reader.GetString(6)
+
+            });
+        }
+
+
+        return list;
+    }
+        public async Task<List<ListeningItem>> GetListeningAsync()
+    {
+        var list = new List<ListeningItem>();
+        using var conn = new SqlConnection(_conn);
+        using var cmd = new SqlCommand(
+            "SELECT ListeningID, AudioPath , CorrectAnswer,  FullText , Hint, Options FROM ListeningBank", conn
+        );
+
+        await conn.OpenAsync();
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            list.Add(new ListeningItem
+            {
+                ListeningID = reader.GetInt32(0),
+                AudioPath = reader.GetString(1),
+                CorrectAnswer = reader.GetString(2),
+                FullText = reader.GetString(3),
+                Hint = reader.GetString(4),
+                Options = reader.GetString(5)
 
             });
         }
