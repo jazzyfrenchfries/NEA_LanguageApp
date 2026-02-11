@@ -219,17 +219,17 @@ public class DatabaseService
         }
         return list;
     }
-    public async Task<List<User>> GetExerciseLeaderboardAsync()
+    public async Task<List<User>> GetExerciseLeaderboardAsync(string ExerciseType)
     {
          var list = new List<User>();
         using var conn = new SqlConnection(_conn);
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = @"SELECT u.Username, SUM(TotalScore) As ExerciseScore
+        cmd.CommandText = @"SELECT u.UserID, u.Username, SUM(S.Score) As ExerciseScore
         From Scores s
-        JOIN Users u on u.UserID = s.UserID
+        JOIN Users u ON u.UserID = s.UserID
         WHERE s.ExerciseType = @Type
-        GROUP BY u.Username
-         ORDER BY ExerciseScore DESC";
+        GROUP BY u.UserID u.Username
+        ORDER BY ExerciseScore DESC";
         cmd.Parameters.AddWithValue("@Type", ExerciseType);
 
         await conn.OpenAsync();

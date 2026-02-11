@@ -13,11 +13,11 @@
     <p>@System.Security.Principal.WindowsIdentity.GetCurrent().Name</p>
 }
 else{
-    <div class="leadeerboard-toggle">
-    <button @onclick="() => ChangeView('All')">Overall</button>
-    <button @onclick="() => ChangeView('Vocabulary')">Overall</button>
-    <button @onclick="() => ChangeView('Conjugation')">Overall</button>
-    <button @onclick="() => ChangeView('Listening')">Overall</button>
+    <div class="leaderboard-toggle">
+    <button @onclick="@(() => ChangeView("All"))">Overall</button>
+<button @onclick="@(() => ChangeView("Vocabulary"))">Vocabulary</button>
+<button @onclick="@(() => ChangeView("Conjugation"))">Conjugation</button>
+<button @onclick="@(() => ChangeView("Listening"))">Listening</button>
     </div>
     <div class="leaderboard-container">
     <table class="leaderboard-table">
@@ -64,7 +64,7 @@ else{
             leaderboard = await Db.GetOverallLeaderboardAsync();
         }
         else{
-            leaderboard = await Db.GetExerciseLeaderboardAsync();
+            leaderboard = await Db.GetExerciseLeaderboardAsync(selectedView);
         }
     }
 }
