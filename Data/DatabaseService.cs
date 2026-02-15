@@ -74,11 +74,6 @@ public class DatabaseService
         }
         return null;
     }
-    public async Task<User> LogoutUserAsync(string username, string password)
-    {
-       // put logout thing here :) 
-        return null;
-    }
     public async Task<List<VocabItem>> GetVocabularyAsync()
     {
         var list = new List<VocabItem>();
@@ -224,13 +219,20 @@ public class DatabaseService
          var list = new List<User>();
         using var conn = new SqlConnection(_conn);
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = @"SELECT u.UserID, u.Username, SUM(S.Score) As ExerciseScore
-        From Scores s
-        JOIN Users u ON u.UserID = s.UserID
-        WHERE s.ExerciseType = @Type
-        GROUP BY u.UserID u.Username
-        ORDER BY ExerciseScore DESC";
-        cmd.Parameters.AddWithValue("@Type", ExerciseType);
+         cmd.Parameters.AddWithValue("@Type", ExerciseType);
+        cmd.CommandText = @"SELECT 
+u.UserID,
+u.UserName,
+SUM(S.Score) As ExerciseScore
+FROM UserScores s
+INNER JOIN Users u on u.UserID = s.UserID
+WHERE s.ExerciseType = 'Vocabulary'
+GROUP BY
+u.UserID,
+u.Username
+ORDER BY
+ExerciseScore DESC;";
+       
 
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
