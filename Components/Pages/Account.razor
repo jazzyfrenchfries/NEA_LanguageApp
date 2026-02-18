@@ -22,8 +22,6 @@
     }
     else
     {
-        <p>Logged in as <strong>@userState.CurrentUser.Username</strong></p>
-
         <h3>Change password</h3>
 
         <div class="login-input">
@@ -31,7 +29,6 @@
                        type="password"
                        placeholder="Current Password" />
         </div>
-
         <div class="login-input">
             <InputText @bind-Value="newPassword"
                        type="password"
@@ -47,9 +44,7 @@
             <p>@message</p>
         }
 
-        <button class="btn btn-primary" @onclick="LogoutUser">
-            Logout
-        </button>
+        <button class="btn btn-primary" @onclick="LogoutUser">Logout</button>
     }
 </div>
 @code{

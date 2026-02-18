@@ -6,7 +6,7 @@
     --text-muted: #7A7268;
     --accent-primary : #7C8A7A;
     --accent-secondary: #9A7F6A;
-
+    --accent-tertiary: #5a544c;
 }
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;

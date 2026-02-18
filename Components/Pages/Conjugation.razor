@@ -30,11 +30,6 @@ else if (!isPlaying)
         <button class="start-button" @onclick="StartConjugation">Start</button>
         <button class="options-button" @onclick="GameOptions">Options</button>
     </div>
-    
-    @if (UserState.CurrentUser != null)
-    {
-        <p>Logged in as <strong>@UserState.CurrentUser.Username</strong></p>
-    }
     </div>
 }
 
@@ -173,7 +168,7 @@ else
 
             await Db.SaveUserScoreAsync(
                 UserState.CurrentUser!.UserID,
-                "Conjugation",
+                "conjugs",
                 currentKey,
                 1,
                 true);

@@ -20,10 +20,6 @@
       <button class="options-button" @onclick="GameOptions">Options</button>
       
     </div>
-    @if (userState.CurrentUser != null)
-    {
-        <p>Logged in as <strong>@userState.CurrentUser.Username</strong></p>
-    }
     </div>
 
 }
@@ -92,7 +88,7 @@ else
     private User currentUser;
     string userAnswer;
     string hint;
-    private int currentkey ;
+    private int currentKey ;
     private bool iscorrect;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
@@ -101,7 +97,7 @@ else
 
     private List<VocabItem> activeQuestions = new();
     private List<VocabItem> items = new();
-    private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentkey);
+    private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentKey);
     private static readonly Random random = new();
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -139,7 +135,7 @@ private VocabItem? GetRandomItem()
     isPlaying = true;
     userAnswer = "";
     hint = string.Empty;
-    currentkey = item.VocabID;
+    currentKey = item.VocabID;
     iscorrect = false;
     hasSubmitted = false;
     isHintUsed = false;
@@ -152,26 +148,34 @@ private VocabItem? GetRandomItem()
     }
    private void NextQuestion(){
     var item = items[random.Next(items.Count)];
-    currentkey = item.VocabID;
+    currentKey = item.VocabID;
     userAnswer = "";
     iscorrect = false;
     hasSubmitted = false;
     isHintUsed = false;
     hasRevealed = false;
 }
-    private void CheckAnswer(){
+    private async Task CheckAnswer()
+    {
         hasSubmitted = true;
-    if (string.Equals(userAnswer?.Trim(), CurrentItem?.Translation?.Trim(), StringComparison.OrdinalIgnoreCase)){
-        iscorrect = true;
-        score++;
-        
-    }
-    else{
-        iscorrect = false;
-        totalCompleted++;
-        if (totalCompleted >= items.Count){
-            EndGame();
-        }
+
+        if (string.Equals(
+            userAnswer.Trim(),
+            CurrentItem?.Translation?.Trim(),
+            StringComparison.OrdinalIgnoreCase))
+        {
+            iscorrect = true;
+            score++;
+
+            await Db.SaveUserScoreAsync(
+                userState.CurrentUser!.UserID,
+                "vocabulary",
+                currentKey,
+                1,
+                true);
+
+            userState.CurrentUser.TotalScore++;
+            await storageService.SetItemAsync("currentUser", userState.CurrentUser);
     }
 }
 

@@ -1,5 +1,10 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Identity.Client
+@inherits LayoutComponentBase
+@inject DatabaseService databaseService
+@inject UserState userState
+@inject AuthenticationStateProvider authenticationStateProvider
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -7,13 +12,12 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-             <a href=account" target="_blank">Account</a>
+             @if (userState.CurrentUser != null){
+                <span class="fw-bold">@userState.CurrentUser.Username</span>
+             }
         </div>
         <article class="content px-4">
             @Body
-
-            <!-- Modal host MUST be inside the interactive render tree -->
             <BlazoredModal />
         </article>
     </main>

@@ -180,7 +180,7 @@ public class DatabaseService
         using var conn = new SqlConnection(_conn);
         using var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO UserScores (UserID,ExerciseType,ExcersiseID,Score,Correct,DateCompletedLast)
+            INSERT INTO UserScores (UserID,ExerciseType,ExerciseID,Score,Correct,DateCompletedLast)
             VALUES (@uid,@type,@exid,@score,@correct, GETDATE());
             UPDATE Users SET TotalScore = TotalScore + @score WHERE UserID = @uid;
         ";
@@ -214,19 +214,19 @@ public class DatabaseService
         }
         return list;
     }
-    public async Task<List<User>> GetExerciseLeaderboardAsync(string ExerciseType)
+    public async Task<List<User>> GetExerciseLeaderboardAsync(string ExerciseID)
     {
          var list = new List<User>();
         using var conn = new SqlConnection(_conn);
         using var cmd = conn.CreateCommand();
-         cmd.Parameters.AddWithValue("@Type", ExerciseType);
+         cmd.Parameters.AddWithValue("@ID", ExerciseID);
         cmd.CommandText = @"SELECT 
 u.UserID,
-u.UserName,
+u.Username,
 SUM(S.Score) As ExerciseScore
 FROM UserScores s
 INNER JOIN Users u on u.UserID = s.UserID
-WHERE s.ExerciseType = 'Vocabulary'
+WHERE s.ExerciseType = @ID
 GROUP BY
 u.UserID,
 u.Username
