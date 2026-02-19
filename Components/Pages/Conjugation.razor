@@ -72,9 +72,9 @@ else
         }
 
         <div class="centered-container">
-            @if (!iscorrect)
+            @if (!hasSubmitted)
             {
-                <button class="check-button" @onclick="CheckAnswer">Submit</button>
+                <button class="check-button" @onclick="CheckAnswer"disabled="@hasSubmitted">Submit</button>
             }
             else
             {
@@ -83,11 +83,11 @@ else
 
             <button class="end-button" @onclick="EndGame">End</button>
 
-            @if (!isHintUsed)
+            @if (!isHintUsed && !hasSubmitted)
             {
                 <button class="hint-button" @onclick="UseHint">Hint</button>
             }
-            @if(isHintUsed){
+            @if(isHintUsed && !hasSubmitted){
                 <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 
             }
         </div>
@@ -158,24 +158,20 @@ else
     {
         hasSubmitted = true;
 
-        if (string.Equals(
-            userAnswer.Trim(),
-            CurrentItem?.CorectAnswer?.Trim(),
-            StringComparison.OrdinalIgnoreCase))
-        {
+        if (string.Equals( userAnswer.Trim(), CurrentItem?.CorectAnswer?.Trim(),StringComparison.OrdinalIgnoreCase)){
             iscorrect = true;
-            score++;
-
+            int pointsEarned = isHintUsed? 0:1;
+            score += pointsEarned;
             await Db.SaveUserScoreAsync(
                 UserState.CurrentUser!.UserID,
                 "conjugs",
                 currentKey,
                 1,
                 true);
-
+            }
             UserState.CurrentUser.TotalScore++;
             await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
-        }
+        
     }
 
     private void NextQuestion()
@@ -207,14 +203,23 @@ else
             :items . Where(x => x.Options == selectedList)
             .ToList();
         currentIndex = 0;
+        if(activeQuestions.Any()){
+            currentKey = activeQuestions[Random.Shared.Next(activeQuestions.Count)].ConjugationID;
+            iscorrect = false;
+            hasSubmitted = false;
+            isHintUsed = false;
+            hasRevealed=false;
+            userAnswer="";
+            hint = " ";
+        }
+        StateHasChanged();
     }
 
     private async Task GameOptions()
     {
         var modal = ModalService.Show<OptionsModalConjugation>("Game Options");
         var result =await modal.Result;
-        if(!result.Cancelled){
-            var options = (OptionsModalConjugation.ConjugationOptions)result.Data;
+        if(!result.Cancelled && result.Data is OptionsModalConjugation.ConjugationOptions options){
             ApplyConjugationFilter(options.SelectedList);
         }
     }
