@@ -117,15 +117,6 @@ else
     private List<ListeningItem> activeQuestions = new();
     private ListeningItem? CurrentItem =>
         items.FirstOrDefault(i => i.ListeningID == currentKey);
-
-    private async Task GameOptions()
-    {
-        var modal = ModalService.Show<OptionsModalListening>("Game Options");
-        var result =await modal.Result;
-        if(!result.Cancelled){
-            var options = (OptionsModalListening.ListeningOptions)result.Data;
-        }
-    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -147,6 +138,16 @@ else
         isLoaded = true;
         StateHasChanged();
     }
+    
+
+    private async Task GameOptions()
+    {
+        var modal = ModalService.Show<OptionsModalListening>("Game Options");
+        var result =await modal.Result;
+        if(!result.Cancelled && result.Data is OptionsModalListening.ListeningOptions options){
+            ApplyListeningFilter(options.SelectedList);
+        }
+    }
     private void ApplyListeningFilter(string selectedList){
         activeQuestions = 
         selectedList == "All"
@@ -154,6 +155,16 @@ else
             :items . Where(x => x.Options == selectedList)
             .ToList();
         currentIndex = 0;
+         if(activeQuestions.Any()){
+            currentKey = activeQuestions[Random.Shared.Next(activeQuestions.Count)].ListeningID;
+            iscorrect = false;
+            hasSubmitted = false;
+            isHintUsed = false;
+            hasRevealed=false;
+            userAnswer="";
+            hint = " ";
+        }
+        StateHasChanged();
     }
     private void StartListening()
     {
