@@ -47,7 +47,8 @@ else
             <p>@CurrentItem.FullText</p>
 
             <audio controls>
-                <source src="@CurrentItem.AudioPath" type="audio/mp3" />
+                <source src="@CurrentItem.AudioPath" type="audio/mpeg" />
+                Your browser does not support the audio element.
             </audio>
         }
 
@@ -56,13 +57,11 @@ else
             <p><strong>Hint:</strong> @CurrentItem?.Hint</p>
         }
 
-        <textarea
-            @bind="userAnswer"
-            @bind:event="oninput"
-            placeholder="Type your answer here..."
-            disabled="@iscorrect"
-            class="answer-box">
-        </textarea>
+        <input class="answer-box"
+               @bind="userAnswer"
+               @bind:event="oninput"
+               placeholder="Type your answer..."
+               disabled="@iscorrect" />
 
        @if (hasSubmitted)
         {
@@ -79,25 +78,28 @@ else
         }
 
         <div class="centered-container">
-            @if (!hasSubmitted|| !hasRevealed )
+            @if (!hasSubmitted)
             {
-                <button class="check-button" @onclick="CheckAnswer">Submit</button>
+                <button class="check-button" @onclick="CheckAnswer"disabled="@hasSubmitted">Submit</button>
             }
-            @if(hasSubmitted || hasRevealed)
+            else
             {
-                <button class="check-button" @onclick="NextQuestion">Next Question</button>
+                <button class="check-button" @onclick="NextQuestion">Next</button>
             }
 
-            <button class="end-button" @onclick="EndGame">End</button>  
-            @if(!isHintUsed && !hasSubmitted)
+            <button class="end-button" @onclick="EndGame">End</button>
+
+            @if (!isHintUsed && !hasSubmitted)
             {
-            <button class="hint-button" @onclick="UseHint">Hint</button>
+                <button class="hint-button" @onclick="UseHint">Hint</button>
             }
-            @if(isHintUsed && !hasRevealed){
+            @if(isHintUsed && !hasSubmitted){
                 <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 
             }
         </div>
     </div>
+
+
 }
 @code {
     private bool isLoaded = false;
@@ -152,7 +154,7 @@ else
         activeQuestions = 
         selectedList == "All"
             ? items.ToList()
-            :items . Where(x => x.Options == selectedList)
+            :items.Where(x => x.Options.Trim() == selectedList.Trim())
             .ToList();
         currentIndex = 0;
          if(activeQuestions.Any()){
@@ -185,27 +187,21 @@ else
     {
         hasSubmitted = true;
 
-        if (CurrentItem == null) return;
-
-        if (string.Equals(
-            userAnswer.Trim(),
-            CurrentItem.CorrectAnswer.Trim(),
-            StringComparison.OrdinalIgnoreCase))
-        {
+        if (string.Equals( userAnswer.Trim(), CurrentItem?.CorrectAnswer?.Trim(),StringComparison.OrdinalIgnoreCase)){
             iscorrect = true;
-            score++;
-
-            await Db.SaveUserScoreAsync(
+            int pointsEarned = isHintUsed? 0:1;
+            score += pointsEarned;
+             await Db.SaveUserScoreAsync(
                 UserState.CurrentUser!.UserID,
                 "Listening",
                 currentKey,
                 1,
                 true
             );
-
-            UserState.CurrentUser.TotalScore += 1;
+            
+            }
+            UserState.CurrentUser.TotalScore++;
             await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
-        }
     }
      private async Task ShowAnswer(){
         hasRevealed = true; 
@@ -217,12 +213,14 @@ else
 
     private void NextQuestion()
     {
+
         StartListening();
     }
 
     private void UseHint()
     {
         isHintUsed = true;
+         hint = CurrentItem?.Hint ?? "";
     }
     private void EndGame(){
         var parameters = new ModalParameters();

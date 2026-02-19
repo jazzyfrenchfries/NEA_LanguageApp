@@ -47,7 +47,6 @@
             .Where(x=> !string.IsNullOrEmpty(x.Options))
             .Select(x => x.Options)
             .Distinct());
-        selectedList= "All";
     }
     private List<ConjugationItem> FilteredQuestionSet =>
     selectedList == "All"
