@@ -20,6 +20,10 @@
       <button class="options-button" @onclick="GameOptions">Options</button>
       
     </div>
+    @if (userState.CurrentUser != null)
+    {
+        <p>Logged in as <strong>@userState.CurrentUser.Username</strong></p>
+    }
     </div>
 
 }
@@ -61,43 +65,37 @@ else
         }
 
         <div class="centered-container">
-            @if (!hasSubmitted && !hasRevealed )
+            @if (!iscorrect)
             {
                 <button class="check-button" @onclick="CheckAnswer">Submit</button>
             }
-            @if(hasSubmitted || hasRevealed)
+            else
             {
                 <button class="check-button" @onclick="NextQuestion">Next Question</button>
             }
 
             <button class="end-button" @onclick="EndGame">End</button>  
-            @if(!isHintUsed && !hasSubmitted)
+            @if(!isHintUsed)
             {
-            <button class="hint-button" @onclick="UseHint">Hint </button>
-            }
-            @if(isHintUsed && !hasRevealed){
-                <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 
+            <button class="hint-button" @onclick="UseHint">Hint</button>
             }
         </div>
     </div>
 }
 
 @code {
-    bool isPlaying = false, hasRevealed = false;
+    bool isPlaying = false;
     int score = 0;
     private User currentUser;
     string userAnswer;
     string hint;
-    private int currentKey ;
+    private int currentkey ;
     private bool iscorrect;
     private bool hasSubmitted = false;
     private bool isHintUsed = false;
     int totalCompleted = 0;
-     private string showAnswer;
-
-    private List<VocabItem> activeQuestions = new();
     private List<VocabItem> items = new();
-    private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentKey);
+    private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentkey);
     private static readonly Random random = new();
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -135,47 +133,33 @@ private VocabItem? GetRandomItem()
     isPlaying = true;
     userAnswer = "";
     hint = string.Empty;
-    currentKey = item.VocabID;
+    currentkey = item.VocabID;
     iscorrect = false;
     hasSubmitted = false;
     isHintUsed = false;
 }
-    private async Task ShowAnswer(){
-        hasRevealed = true; 
-        hasSubmitted = true;
-        iscorrect = false;
-        showAnswer = CurrentItem.Translation;
-    }
+
    private void NextQuestion(){
     var item = items[random.Next(items.Count)];
-    currentKey = item.VocabID;
+    currentkey = item.VocabID;
     userAnswer = "";
     iscorrect = false;
     hasSubmitted = false;
     isHintUsed = false;
-    hasRevealed = false;
 }
-    private async Task CheckAnswer()
-    {
+    private void CheckAnswer(){
         hasSubmitted = true;
-
-        if (string.Equals(
-            userAnswer.Trim(),
-            CurrentItem?.Translation?.Trim(),
-            StringComparison.OrdinalIgnoreCase))
-        {
-            iscorrect = true;
-            score++;
-
-            await Db.SaveUserScoreAsync(
-                userState.CurrentUser!.UserID,
-                "vocabulary",
-                currentKey,
-                1,
-                true);
-
-            userState.CurrentUser.TotalScore++;
-            await storageService.SetItemAsync("currentUser", userState.CurrentUser);
+    if (string.Equals(userAnswer?.Trim(), CurrentItem?.Translation?.Trim(), StringComparison.OrdinalIgnoreCase)){
+        iscorrect = true;
+        score++;
+        
+    }
+    else{
+        iscorrect = false;
+        totalCompleted++;
+        if (totalCompleted >= items.Count){
+            EndGame();
+        }
     }
 }
 
