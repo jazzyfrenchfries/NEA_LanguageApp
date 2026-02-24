@@ -172,7 +172,7 @@ else
     {
         if (items.Count == 0) return;
 
-        var item = items[Random.Shared.Next(items.Count)];
+        var activeQuestions = items[Random.Shared.Next(items.Count)];
         currentKey = item.ListeningID;
 
         isPlaying = true;

@@ -22,18 +22,15 @@
     }
     else
     {
-        <h3>Change password</h3>
+        <p>Logged in as <strong>@userState.CurrentUser.Username</strong></p>
 
-        <div class="login-input">
-            <InputText @bind-Value="currentPassword"
-                       type="password"
-                       placeholder="Current Password" />
-        </div>
-        <div class="login-input">
-            <InputText @bind-Value="newPassword"
-                       type="password"
-                       placeholder="New Password" />
-        </div>
+        <h3>Change password</h3>
+       <div class="login-input">
+       <InputText @bind-Value="currentPassword" type="password"placeholder="Password Current"/>
+       </div>
+       <div class="login-input">
+       <InputText @bind-Value="newPassword" type="password" placeholder="Password New"/>
+       </div>
 
         <button class="btn btn-primary" @onclick="HandleChangePassword">
             Change Password
@@ -44,7 +41,9 @@
             <p>@message</p>
         }
 
-        <button class="btn btn-primary" @onclick="LogoutUser">Logout</button>
+        <button class="btn btn-primary" @onclick="LogoutUser">
+            Logout
+        </button>
     }
 </div>
 @code{
@@ -101,7 +100,6 @@
 .account-container {
 max-width: 850px;
 margin: 2.5rem auto;
-margin-bottom: 10rem;
 padding: 2.5rem;
 border-radius: 24px;
 background: var(--card-bg);
@@ -132,5 +130,11 @@ border-top-right-radius: 24px;
 font-size: 1rem;
 color: var(--text-muted);
 margin-bottom: 1rem;
+}
+.login-input  {
+
+    width:100%;
+    max-width:320px;
+    padding:0.6rem;
 }
 </style>

@@ -10,12 +10,11 @@
 <p> Welcome to your new french learning app</p>
 <p>You can complete conjugation, vocabulary and listening exercises to earn points.</p>
 <p> Compete with other users to earn top place on the leaderboard!</p>
-<p>  change your account password or logout on the account page </p>
 @if(userState.CurrentUser != null){
-    <p> Welcome, @userState.CurrentUser.Username!</p>
+    <h2> Welcome, @userState.CurrentUser.Username!</h2>
 }
 else{
-    <p> please login to save your progress</p>
+    <h2> please login to save your progress</h2>
 }
 
 <button class ="btn btn-primary" @onclick ="GoToLeaderboard"> Leaderboard</button>
@@ -80,6 +79,17 @@ font-weight: 500;
 border-top-left-radius: 24px;
 border-top-right-radius: 24px;
 }
+.content-container h1 {
+margin: -2.5rem -2.5rem 2rem -2.5rem;
+padding: 1.5rem 2.5rem;
+background-color: var(--accent-primary);
+color: #ffffff;
+font-size: 1.6rem;
+font-weight: 500;
+border-top-left-radius: 24px;
+border-top-right-radius: 24px;
+}
+
 
 .content-container p {
 font-size: 1rem;

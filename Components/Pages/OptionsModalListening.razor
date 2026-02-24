@@ -1,5 +1,6 @@
 @inject Blazored.Modal.Services.IModalService ModalService
 @using Blazored.Modal
+@using Microsoft.AspNetCore.Server.Kestrel.Core
 @using Microsoft.Extensions.Options
 
 @inject DatabaseService databaseService
@@ -10,7 +11,7 @@
     <div class="option-group">
         <label>Select Listening List:</label>
         <select @bind="selectedList" class="options-select">
-            @foreach (var list in ListeningLists)
+            @foreach (var list in listeningLists)
             {
                 <option value="@list">@list</option>
             }
@@ -26,31 +27,31 @@
     [Parameter] 
     public ListeningItem listeningItem {get; set;}
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    private List<string> ListeningLists = new();
+    private List<string> listeningLists = new();
     private List<ListeningItem> allItems = new List<ListeningItem>();
     private string selectedList = "All";
     
     protected override async Task OnInitializedAsync(){
-        allItems = await databaseService. GetListeningAsync();
+        allItems = await databaseService.GetListeningAsync();
         AddOptionsToList();
     }
     private  void OnParametersSet(){
-        ListeningLists.Clear();
-        ListeningLists.Add("All");
+        listeningLists.Clear();
+        listeningLists.Add("All");
         AddOptionsToList(); 
-        selectedList = ListeningLists.First();
+        selectedList = listeningLists.First();
     }
     private void AddOptionsToList(){
-        ListeningLists.Clear();
-        ListeningLists.Add("All");
-        ListeningLists.AddRange(allItems
+        listeningLists.Clear();
+        listeningLists.Add("All");
+        listeningLists.AddRange(allItems
             .Where(x=> !string.IsNullOrEmpty(x.Options))
             .Select(x => x.Options)
             .Distinct());
     }
     private List<ListeningItem> FilteredQuestionSet =>
     selectedList == "All"
-    ? allItems: allItems.Where( x=> x.Options == selectedList).ToList();
+    ? allItems: allItems.Where(x=> x.Options == selectedList).ToList();
     private async Task ApplyOptions()
     {
         var result = new ListeningOptions

@@ -1,10 +1,9 @@
 @page "/leaderboard"
 @inject DatabaseService Db
-@using BootstrapBlazor.Components
 @using Microsoft.Data.SqlClient;
 
 <PageTitle>Leaderboard</PageTitle>
- <div class ="content-container">
+
 <h1>Welcome to the leaderboards </h1>
 
 @if(users == null)
@@ -12,14 +11,7 @@
     <p>Loading...</p>
     <p>@System.Security.Principal.WindowsIdentity.GetCurrent().Name</p>
 }
-else{ 
-   
-    <div class="leaderboard-toggle">
-    <button class="button" @onclick="@(() => ChangeView("All"))">Overall</button>
-<button class="button" @onclick="@(() => ChangeView("Vocabulary"))">Vocabulary</button>
-<button class="button" @onclick="@(() => ChangeView("Conjugation"))">Conjugation</button>
-<button class="button"@onclick="@(() => ChangeView("Listening"))">Listening</button>
-    </div>
+else{
     <div class="leaderboard-container">
     <table class="leaderboard-table">
         <thead>
@@ -43,57 +35,21 @@ else{
     </div>
 
 }
-</div>
 @code{
-    private List<User> users = new();
-    private string selectedView = "All";
+    private List<User> users;
     protected override async Task OnInitializedAsync(){
-        users = await Db.GetOverallLeaderboardAsync(20);
-    }
-    private async Task ChangeView(string view){
-        selectedView = view;
-        await LoadLeaderboard();
-    }
-    private async Task LoadLeaderboard(){
-        if(selectedView == "All"){
-            users = await Db.GetOverallLeaderboardAsync();
+        try{
+            users = await Db.GetOverallLeaderboardAsync(20);
         }
-        else{
-            users = await Db.GetExerciseLeaderboardAsync(selectedView);
+        catch(Exception ex){
+            Console.WriteLine("Error loading Leaderboard: " + ex);
         }
     }
 }
 <style>
-.content-container {
-max-width: 850px;
-margin: 2.5rem auto;
-padding: 2.5rem;
-border-radius: 24px;
-background: var(--card-bg);
-box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-font-family: 'Inter', 'Segoe UI', sans-serif;
-}
-
-
-.content-container h1 {
-margin: -2.5rem -2.5rem 2rem -2.5rem;
-padding: 1.5rem 2.5rem;
-background-color: var(--accent-primary);
-color: #ffffff;
-font-size: 1.6rem;
-font-weight: 500;
-border-top-left-radius: 24px;
-border-top-right-radius: 24px;
-}
-
-.content-container p {
-font-size: 1rem;
-color: var(--text-muted);
-margin-bottom: 1rem;
-}
 .leaderboard-container {
     display: flex;
-    justify-content: center; 
+    justify-content: center;
     margin-top: 2rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -101,13 +57,14 @@ margin-bottom: 1rem;
 
 .leaderboard-table {
     border-collapse: collapse;
-    width: 100%;
+    width: 100%; 
     max-width: 700px;
     background-color: #f9f9f9;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
     overflow: hidden;
 }
+
 
 .leaderboard-table th {
     background-color: var(--text-muted);
@@ -117,33 +74,17 @@ margin-bottom: 1rem;
     font-size: 1.1rem;
 }
 
-
 .leaderboard-table td {
     padding: 10px;
     text-align: center;
     border-bottom: 1px solid #ddd;
 }
 
-
 .leaderboard-table tr:hover {
     background-color: var(--text-main);
 }
 
-
 .leaderboard-table tr:nth-child(even) {
     background-color: #f7f7f7;
 }
-button {
-font-family: inherit;
-font-weight: 500;
-padding: 0.6rem 1.6rem;
-font-size: 0.95rem;
-border-radius: 999px;
-border: none;
-cursor: pointer;
-background-color: var(--accent-tertiary);
-color: #ffffff;
-transition: opacity 0.2s ease;
-}
-
 </style>

@@ -136,8 +136,8 @@ else
     {
         if (activeQuestions.Count == 0) return;
 
-        var CurrentQuestion = activeQuestions[Random.Shared.Next(activeQuestions.Count)];
-        currentKey = CurrentQuestion.ConjugationID;
+        var currentQuestion = activeQuestions[Random.Shared.Next(activeQuestions.Count)];
+        currentKey = currentQuestion.ConjugationID;
 
         isPlaying = true;
         iscorrect = false;
@@ -164,7 +164,7 @@ else
             score += pointsEarned;
             await Db.SaveUserScoreAsync(
                 UserState.CurrentUser!.UserID,
-                "conjugs",
+                "conjugation",
                 currentKey,
                 1,
                 true);
