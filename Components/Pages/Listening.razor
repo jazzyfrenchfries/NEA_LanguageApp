@@ -118,7 +118,7 @@ else
     private List<ListeningItem> items = new();
     private List<ListeningItem> activeQuestions = new();
     private ListeningItem? CurrentItem =>
-        items.FirstOrDefault(i => i.ListeningID == currentKey);
+        activeQuestions.FirstOrDefault(i => i.ListeningID == currentKey);
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -136,11 +136,25 @@ else
 
        
        items = await Db.GetListeningAsync();
-        ApplyListeningFilter("All");
         isLoaded = true;
         StateHasChanged();
     }
-    
+       private void StartListening()
+    {
+        if (activeQuestions.Count == 0) return;
+
+        var currentQuestion = activeQuestions[Random.Shared.Next(items.Count)];
+        currentKey = currentQuestion.ListeningID;
+
+        isPlaying = true;
+        iscorrect = false;
+        hasSubmitted = false;
+        isHintUsed = false;
+        hasRevealed = false;
+        userAnswer = "";
+        hint = "";
+        showAnswer="";
+    }
 
     private async Task GameOptions()
     {
@@ -154,7 +168,7 @@ else
         activeQuestions = 
         selectedList == "All"
             ? items.ToList()
-            :items.Where(x => x.Options.Trim() == selectedList.Trim())
+            :items.Where(x => x.Options == selectedList)
             .ToList();
         currentIndex = 0;
          if(activeQuestions.Any()){
@@ -168,20 +182,7 @@ else
         }
         StateHasChanged();
     }
-    private void StartListening()
-    {
-        if (items.Count == 0) return;
-
-        var activeQuestions = items[Random.Shared.Next(items.Count)];
-        currentKey = item.ListeningID;
-
-        isPlaying = true;
-        iscorrect = false;
-        hasSubmitted = false;
-        isHintUsed = false;
-        hasRevealed = false;
-        userAnswer = "";
-    }
+ 
 
     private async Task CheckAnswer()
     {
@@ -193,7 +194,7 @@ else
             score += pointsEarned;
              await Db.SaveUserScoreAsync(
                 UserState.CurrentUser!.UserID,
-                "Listening",
+                "listening",
                 currentKey,
                 1,
                 true
@@ -222,10 +223,16 @@ else
         isHintUsed = true;
          hint = CurrentItem?.Hint ?? "";
     }
-    private void EndGame(){
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(EndGameModal.Score), score);
+    private void EndGame()
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(EndGameModal.Score), score }
+        };
+
         ModalService.Show<EndGameModal>("Game Over", parameters);
+        isPlaying = false;
+        score = 0;
     }
 }
 
