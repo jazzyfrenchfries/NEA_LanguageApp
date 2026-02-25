@@ -12,21 +12,21 @@
 <h1>Register.</h1>
 <div class="page-center">
 <p> Please Register here to save your progress.</p>
-<EditForm Model ="RegisterModel" OnValidSubmit="RegisterUser">
-    <DateAnnotationsValidator />
+<EditForm Model ="registerModel" OnValidSubmit="RegisterUser">
+    <DataAnnotationsValidator />
     <ValidationSummary/>
 <div class="register-input"
-<InputText @bind-Value="username" placeholder="Username"/>
+<InputText @bind-Value="registerModel.username" placeholder="Username"/>
 <ValidationMessage For="@(()=> registerModel.Username)" />
 </div>
 <div class="register-input">
-<InputText @bind-Value="password" type="password" placeholder="Password"/>
+<InputText @bind-Value="registerModel.password" type="password" placeholder="Password"/>
 <ValidationMessage For="@(()=> registerModel.Password)" />
 </div>
 
 <div class="register-buttons">
-<button  class ="btn btn-primary"@onclick="RegisterUser">Register</button>
-<button  class ="btn btn-primary" @onclick="Cancel">Cancel</button>
+<button  class ="btn btn-primary"RegisterUser">Register</button>
+<button  class ="btn btn-primary""Cancel">Cancel</button>
 </div>
 </EditForm>
 <p>@error</p>
