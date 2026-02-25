@@ -10,7 +10,7 @@
     <div class="option-group">
         <label>Select Vocabulary List:</label>
         <select @bind="selectedList" class="options-select">
-            @foreach (var list in VocabLists)
+            @foreach (var list in vocabLists)
             {
                 <option value="@list">@list</option>
             }
@@ -26,7 +26,7 @@
     [Parameter] 
     public VocabItem vocabItem {get; set;}
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    private List<string> VocabLists = new();
+    private List<string> vocabLists = new();
     private List<VocabItem> allItems = new List<VocabItem>();
     private string selectedList = "All";
     
@@ -35,15 +35,15 @@
         AddOptionsToList();
     }
     private  void OnParametersSet(){
-        VocabLists.Clear();
-        VocabLists.Add("All");
+        vocabLists.Clear();
+        vocabLists.Add("All");
         AddOptionsToList(); 
-        selectedList = VocabLists.First();
+        selectedList = vocabLists.First();
     }
     private void AddOptionsToList(){
-        VocabLists.Clear();
-        VocabLists.Add("All");
-        VocabLists.AddRange(allItems
+        vocabLists.Clear();
+        vocabLists.Add("All");
+        vocabLists.AddRange(allItems
             .Where(x=> !string.IsNullOrEmpty(x.Options))
             .Select(x => x.Options)
             .Distinct());

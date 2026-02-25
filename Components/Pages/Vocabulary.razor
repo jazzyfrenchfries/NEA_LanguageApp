@@ -82,18 +82,16 @@ else
 
 @code {
     bool isPlaying = false;
-    int score = 0;
+   
     private User currentUser;
-    string userAnswer;
-    string hint;
-    private int currentkey ;
-    private bool iscorrect;
-    private bool hasSubmitted = false;
-    private bool isHintUsed = false;
-    int totalCompleted = 0;
+    string userAnswer, hint, showAnswer;
+    private int currentKey,totalCompleted, score , currentIndex;
+    private bool iscorrect, hasSubmitted, isHintUsed, isloaded,hasRevealed;
+   
     private List<VocabItem> items = new();
-    private VocabItem? CurrentItem => items.FirstOrDefault(i => i.VocabID == currentkey);
-    private static readonly Random random = new();
+     private List<VocabItem> activeQuestions = new();
+    private VocabItem? CurrentItem => activeQuestions.FirstOrDefault(i => i.VocabID == currentKey);
+
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -109,74 +107,90 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
         userState.SetUser(user);
 
         items = await Db.GetVocabularyAsync();
-
+        ApplyVocabularyFilter("All");
+        isloaded = true;
         StateHasChanged();
     }
-private VocabItem? GetRandomItem()
-{
-    if (items == null || items.Count == 0)
-        return null;
-
-    return items[random.Next(items.Count)];
-}
-   private void StartVocabulary()
-{
-    var item = GetRandomItem();
-    if(item == null){
-        isPlaying = false;
-        return;
-    }
-
-    isPlaying = true;
-    userAnswer = "";
-    hint = string.Empty;
-    currentkey = item.VocabID;
-    iscorrect = false;
-    hasSubmitted = false;
-    isHintUsed = false;
-}
-
-   private void NextQuestion(){
-    var item = items[random.Next(items.Count)];
-    currentkey = item.VocabID;
-    userAnswer = "";
-    iscorrect = false;
-    hasSubmitted = false;
-    isHintUsed = false;
-}
-    private void CheckAnswer(){
-        hasSubmitted = true;
-    if (string.Equals(userAnswer?.Trim(), CurrentItem?.Translation?.Trim(), StringComparison.OrdinalIgnoreCase)){
-        iscorrect = true;
-        score++;
+    private void StartVocabulary(){
+        if(activeQuestions.Count ==0) return;
+        var currentQuestion = activeQuestions[Random.Shared.Next(activeQuestions.Count)];
+        currentKey = currentQuestion.VocabID;
         
-    }
-    else{
+        isPlaying = true;
         iscorrect = false;
-        totalCompleted++;
-        if (totalCompleted >= items.Count){
-            EndGame();
-        }
+        hasSubmitted = false;
+        isHintUsed = false;
+        hasRevealed = false;
+        userAnswer = "";
+        hint = "";
+        showAnswer="";
+
     }
+  private async Task GameOptions()
+{
+    var modal = ModalService.Show<OptionsModalVocab>("Game Options");
+    var result = await modal.Result;
+
+    if(!result.Cancelled && result.Data is OptionsModalVocab.VocabularyOptions options){
+            ApplyVocabularyFilter(options.SelectedList);
+        }
 }
+private void ApplyVocabularyFilter(string selectedList){
+        activeQuestions = 
+        selectedList == "All"
+            ? items.ToList()
+            :items.Where(x => x.Options == selectedList)
+            .ToList();
+        currentIndex = 0;
+         if(activeQuestions.Any()){
+            currentKey = activeQuestions[Random.Shared.Next(activeQuestions.Count)].VocabID;
+            iscorrect = false;
+            hasSubmitted = false;
+            isHintUsed = false;
+            hasRevealed=false;
+            userAnswer="";
+            hint = " ";
+        }
+        StateHasChanged();
+    }
+    private async Task CheckAnswer(){
+        hasSubmitted = true;
+       if (string.Equals( userAnswer.Trim(), CurrentItem?.Translation?.Trim(),StringComparison.OrdinalIgnoreCase)){
+            iscorrect = true;
+            int pointsEarned = isHintUsed? 0:1;
+            score += pointsEarned;
+             await Db.SaveUserScoreAsync(
+                userState.CurrentUser!.UserID,
+                "vocabulary",
+                currentKey,
+                1,
+                true
+            );
+            
+            }
+            userState.CurrentUser.TotalScore++;
+            await storageService.SetItemAsync("currentUser", userState.CurrentUser);
+    }
+    private async Task ShowAnswer(){
+        hasRevealed = true;
+        hasSubmitted = true;
+        iscorrect = true;
+        showAnswer = CurrentItem.Translation;
+    }
+    private void NextQuestion(){
+        StartVocabulary();
+    }
 
      private void EndGame(){
         var parameters = new ModalParameters();
         parameters.Add(nameof(EndGameModal.Score), score);
 
         ModalService.Show<EndGameModal>("Game Over", parameters);
+        isPlaying = false;
+        score = 0;
     }
-    private async Task GameOptions()
-{
-    var modal = ModalService.Show<OptionsModalVocab>("Game Options");
-    var result = await modal.Result;
 
-    if (!result.Cancelled)
-    {
-        var options = (OptionsModalVocab.VocabularyOptions)result.Data;
-        
-    }
-}
+   
     private void UseHint(){
         isHintUsed = true;
         hint = CurrentItem?.Hint ?? string.Empty;
