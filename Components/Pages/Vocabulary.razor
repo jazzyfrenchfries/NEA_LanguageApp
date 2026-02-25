@@ -10,19 +10,25 @@
 @inject IModalService ModalService
 <PageTitle>vocabulary</PageTitle>
 
+ @if (!isLoaded){
+    <p>Loading...</p>
+}
+else if (userState.CurrentUser == null)
+{
+    <p>You must be logged in to access this page.</p>
+}
+
 @if (!isPlaying)
 {
     <div class="vocabulary-container">
     <h1>Vocabulary Game</h1>
-    <p>Test your vocabulary skills! Click the button below to start.</p>
+    <p>Test your vocabulary knowledge! Click start to begin.</p>
+
     <div class="centered-container">
         <button class="start-button" @onclick="StartVocabulary">Start</button>
-      <button class="options-button" @onclick="GameOptions">Options</button>
-      
+        <button class="options-button" @onclick="GameOptions">Options</button>
     </div>
-    
     </div>
-
 }
 else
 {
@@ -34,18 +40,16 @@ else
         {
             <p>What is this in English? : <strong>@CurrentItem.FrenchWord</strong></p>
         }
-        @if (isHintUsed && !string.IsNullOrEmpty(hint))
+        @if (isHintUsed)
         {
-            <p>Hint: @hint</p>
+            <p><strong>Hint:</strong> @CurrentItem?.Hint</p>
         }   
 
-        <textarea 
-            @bind="userAnswer" 
-            @bind:event="oninput"
-            placeholder="Type your answer here..." 
-            class="answer-box" 
-            disabled="@iscorrect">
-        </textarea>
+        <input class="answer-box"
+               @bind="userAnswer"
+               @bind:event="oninput"
+               placeholder="Type your answer..."
+               disabled="@iscorrect" />
 
         @if (hasSubmitted)
         {
@@ -62,7 +66,7 @@ else
         }
 
         <div class="centered-container">
-            @if (!iscorrect)
+            @if (!hasSubmitted)
             {
                 <button class="check-button" @onclick="CheckAnswer">Submit</button>
             }
@@ -72,10 +76,14 @@ else
             }
 
             <button class="end-button" @onclick="EndGame">End</button>  
-            @if(!isHintUsed)
+            @if(!isHintUsed && !hasSubmitted)
             {
             <button class="hint-button" @onclick="UseHint">Hint</button>
             }
+            @if(isHintUsed && !hasSubmitted){
+                <button class="answer-button" @onclick="ShowAnswer">Reveal</button> 
+            }
+
         </div>
     </div>
 }
@@ -86,7 +94,7 @@ else
     private User currentUser;
     string userAnswer, hint, showAnswer;
     private int currentKey,totalCompleted, score , currentIndex;
-    private bool iscorrect, hasSubmitted, isHintUsed, isloaded,hasRevealed;
+    private bool iscorrect, hasSubmitted, isHintUsed, isLoaded,hasRevealed;
    
     private List<VocabItem> items = new();
      private List<VocabItem> activeQuestions = new();
@@ -108,7 +116,7 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
 
         items = await Db.GetVocabularyAsync();
         ApplyVocabularyFilter("All");
-        isloaded = true;
+        isLoaded = true;
         StateHasChanged();
     }
     private void StartVocabulary(){
