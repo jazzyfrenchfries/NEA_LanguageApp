@@ -12,33 +12,40 @@
 <h1>Register.</h1>
 <div class="page-center">
 <p> Please Register here to save your progress.</p>
+<EditForm Model ="RegisterModel" OnValidSubmit="RegisterUser">
+    <DateAnnotationsValidator />
+    <ValidationSummary/>
 <div class="register-input"
 <InputText @bind-Value="username" placeholder="Username"/>
+<ValidationMessage For="@(()=> registerModel.Username)" />
 </div>
 <div class="register-input">
 <InputText @bind-Value="password" type="password" placeholder="Password"/>
+<ValidationMessage For="@(()=> registerModel.Password)" />
 </div>
+
 <div class="register-buttons">
-<button  class ="btn btn-primary"@onclick="RegisterUser">Login</button>
+<button  class ="btn btn-primary"@onclick="RegisterUser">Register</button>
 <button  class ="btn btn-primary" @onclick="Cancel">Cancel</button>
 </div>
+</EditForm>
 <p>@error</p>
 </div>
 </div>
 @code{
+
     [Inject] ILocalStorageService storageService { get; set;}
+    private RegisterModel registerModel = new RegisterModel();
     private string error;
-    private string username;
-    private string password;
     private async Task RegisterUser(){
-        username = username.Trim();
-        password = password.Trim();
+       var username = registerModel.Username.Trim();]
+       var password = registerModel.Password.Trim();
+
         var success = await Db.RegisterUserAsync(username, password);
         if(success){
             var user = await Db.LoginUserAsync(username,password);
             if(user != null){
                 await storageService.SetItemAsync("currentUser", user);
-                error = "Login Sucessful!";
                 NavMenu.NavigateTo("/");
                 }
             else{
@@ -46,6 +53,9 @@
             
             }
             }
+        else{
+            error = "Registration failed";
+        }
         }
     private void Cancel(){
         NavMenu.NavigateTo("/");
