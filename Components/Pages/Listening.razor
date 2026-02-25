@@ -136,6 +136,8 @@ else
 
        
        items = await Db.GetListeningAsync();
+
+        ApplyListeningFilter("All");
         isLoaded = true;
         StateHasChanged();
     }
@@ -143,7 +145,7 @@ else
     {
         if (activeQuestions.Count == 0) return;
 
-        var currentQuestion = activeQuestions[Random.Shared.Next(items.Count)];
+        var currentQuestion = activeQuestions[Random.Shared.Next(activeQuestions.Count)];
         currentKey = currentQuestion.ListeningID;
 
         isPlaying = true;
