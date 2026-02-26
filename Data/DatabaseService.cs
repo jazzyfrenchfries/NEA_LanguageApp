@@ -14,7 +14,7 @@ public class DatabaseService
 
     public DatabaseService(IConfiguration configuration)
     {
-        if(configuration == null)
+        if (configuration == null)
         {
             throw new ArgumentNullException(nameof(configuration));
         }
@@ -91,7 +91,7 @@ public class DatabaseService
                     VocabID = reader.GetInt32(0),
                     FrenchWord = reader.GetString(1),
                     Translation = reader.GetString(2),
-                    Hint =  reader.GetString(3),
+                    Hint = reader.GetString(3),
                     Options = reader.GetString(4)
                 });
             }
@@ -127,7 +127,7 @@ public class DatabaseService
 
         return list;
     }
-        public async Task<List<ListeningItem>> GetListeningAsync()
+    public async Task<List<ListeningItem>> GetListeningAsync()
     {
         var list = new List<ListeningItem>();
         using var conn = new SqlConnection(_conn);
@@ -166,7 +166,8 @@ public class DatabaseService
         using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
-            return new User {
+            return new User
+            {
                 UserID = reader.GetInt32(0),
                 Username = reader.GetString(1),
                 TotalScore = reader.GetInt32(2)
@@ -216,10 +217,10 @@ public class DatabaseService
     }
     public async Task<List<User>> GetExerciseLeaderboardAsync(string ExerciseID)
     {
-         var list = new List<User>();
+        var list = new List<User>();
         using var conn = new SqlConnection(_conn);
         using var cmd = conn.CreateCommand();
-         cmd.Parameters.AddWithValue("@ID", ExerciseID);
+        cmd.Parameters.AddWithValue("@ID", ExerciseID);
         cmd.CommandText = @"SELECT 
 u.UserID,
 u.Username,
@@ -232,7 +233,7 @@ u.UserID,
 u.Username
 ORDER BY
 ExerciseScore DESC;";
-       
+
 
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
@@ -247,25 +248,39 @@ ExerciseScore DESC;";
         }
         return list;
     }
-        public async Task <bool> ChangePassword(string username,string OldPassword, string newPassword){
-            var oldHash = HashPassword(OldPassword);
-            var newHash = HashPassword(newPassword);
-            using var connection = new SqlConnection(_conn);
-            await connection.OpenAsync();
-            var checkCommand = new SqlCommand(
-             "SELECT COUNT(*) FROM Users WHERE Username= @u AND PasswordHash = @p",connection
-            );
-            checkCommand.Parameters.AddWithValue("@u", username);
-            checkCommand.Parameters.AddWithValue(@"p",oldHash);
-            int match = (int) await checkCommand.ExecuteScalarAsync();
-            if(match == 0){
-                return false;
-            }
-            var updateCommand = new SqlCommand("UPDATE Users SET PasswordHash = @newP WHERE Username = @u", connection);
-            updateCommand.Parameters.AddWithValue("@newP", newHash);
-            updateCommand.Parameters.AddWithValue("@u", username);
-            await updateCommand.ExecuteNonQueryAsync();
-            return true;
-        
+    public async Task<bool> ChangePassword(string username, string OldPassword, string newPassword)
+    {
+        var oldHash = HashPassword(OldPassword);
+        var newHash = HashPassword(newPassword);
+        using var connection = new SqlConnection(_conn);
+        await connection.OpenAsync();
+        var checkCommand = new SqlCommand(
+         "SELECT COUNT(*) FROM Users WHERE Username= @u AND PasswordHash = @p", connection
+        );
+        checkCommand.Parameters.AddWithValue("@u", username);
+        checkCommand.Parameters.AddWithValue(@"p", oldHash);
+        int match = (int)await checkCommand.ExecuteScalarAsync();
+        if (match == 0)
+        {
+            return false;
+        }
+        var updateCommand = new SqlCommand("UPDATE Users SET PasswordHash = @newP WHERE Username = @u", connection);
+        updateCommand.Parameters.AddWithValue("@newP", newHash);
+        updateCommand.Parameters.AddWithValue("@u", username);
+        await updateCommand.ExecuteNonQueryAsync();
+        return true;
+
     }
+    public async Task DeleteUserAsync(int UserId)
+    {
+        using var connection = new SqlConnection(_conn);
+        await connection.OpenAsync();
+        var command = new SqlCommand("DELETE FROM Scores WHERE UserID = @UserID", connection);
+        var command2 = new SqlCommand("DELETE FROM Users WHERE UserID = @UserID", connection);
+        command.Parameters.AddWithValue("@UserId", UserId);
+        command2.Parameters.AddWithValue("@UserId", UserId);
+        await command.ExecuteNonQueryAsync();
+        await command2.ExecuteNonQueryAsync();
+    }
+
 }

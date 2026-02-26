@@ -1,8 +1,13 @@
 @inject Blazored.Modal.Services.IModalService ModalService
 @using Blazored.Modal
+@using BootstrapBlazor.Components
 @using Microsoft.Extensions.Options
 
-@inject DatabaseService databaseService
+@inject ILocalStorageService storageService
+@inject BlazoredModalInstance modalInstance
+@inject DatabaseService Db
+@inject NavigationManager Nav
+@inject UserState userState
 
 <div class="options-modal">
     <div class="option-group">
@@ -23,15 +28,19 @@
     
     private async Task DeleteUser()
     {
+       if(userState.CurrentUser == null){
+            return;
+       }
+       await Db.DeleteUserAsync(userState.CurrentUser.UserID);
+       await LocalStorage.RemoveItemAsync("currentUser");
+       userState.SetUser(null);
+       await modalInstance.CloseAsync();
+       Nav.NavigateTo("/", forceLoad:true);
        
     }
 
     private async Task Cancel() => BlazoredModal.CancelAsync();
 
-    public class ConjugationOptions
-    {
-        public string SelectedList { get; set; }
-    }
 }
 
 <style>
