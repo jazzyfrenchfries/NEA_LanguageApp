@@ -275,7 +275,7 @@ ExerciseScore DESC;";
     {
         using var connection = new SqlConnection(_conn);
         await connection.OpenAsync();
-        var command = new SqlCommand("DELETE FROM Scores WHERE UserID = @UserID", connection);
+        var command = new SqlCommand("DELETE FROM UserScores WHERE UserID = @UserID", connection);
         var command2 = new SqlCommand("DELETE FROM Users WHERE UserID = @UserID", connection);
         command.Parameters.AddWithValue("@UserId", UserId);
         command2.Parameters.AddWithValue("@UserId", UserId);

@@ -2,9 +2,9 @@
 @using Blazored.Modal
 @using BootstrapBlazor.Components
 @using Microsoft.Extensions.Options
+@using Blazored.LocalStorage
 
 @inject ILocalStorageService storageService
-@inject BlazoredModalInstance modalInstance
 @inject DatabaseService Db
 @inject NavigationManager Nav
 @inject UserState userState
@@ -32,9 +32,9 @@
             return;
        }
        await Db.DeleteUserAsync(userState.CurrentUser.UserID);
-       await LocalStorage.RemoveItemAsync("currentUser");
+       await storageService.RemoveItemAsync("currentUser");
        userState.SetUser(null);
-       await modalInstance.CloseAsync();
+       await BlazoredModal.CloseAsync();
        Nav.NavigateTo("/", forceLoad:true);
        
     }
