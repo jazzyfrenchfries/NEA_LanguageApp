@@ -15,21 +15,20 @@
 <EditForm Model ="registerModel" OnValidSubmit="RegisterUser">
     <DataAnnotationsValidator />
     <ValidationSummary/>
-<div class="register-input"
-<InputText @bind-Value="registerModel.username" placeholder="Username"/>
+<div class="register-input">
+<InputText @bind-Value="registerModel.Username" placeholder="Username"/>
 <ValidationMessage For="@(()=> registerModel.Username)" />
 </div>
 <div class="register-input">
-<InputText @bind-Value="registerModel.password" type="password" placeholder="Password"/>
+<InputText @bind-Value="registerModel.Password" type="password" placeholder="Password"/>
 <ValidationMessage For="@(()=> registerModel.Password)" />
 </div>
 
 <div class="register-buttons">
-<button  class ="btn btn-primary"RegisterUser">Register</button>
-<button  class ="btn btn-primary""Cancel">Cancel</button>
+<button type= "submit" class ="btn btn-primary"RegisterUser">Register</button>
+<button type= "submit"  class ="btn btn-primary""Cancel">Cancel</button>
 </div>
 </EditForm>
-<p>@error</p>
 </div>
 </div>
 @code{
@@ -38,7 +37,7 @@
     private RegisterModel registerModel = new RegisterModel();
     private string error;
     private async Task RegisterUser(){
-       var username = registerModel.Username.Trim();]
+       var username = registerModel.Username.Trim();
        var password = registerModel.Password.Trim();
 
         var success = await Db.RegisterUserAsync(username, password);

@@ -5,11 +5,17 @@
 @using NEA.Components.Layout
 @using System.Threading.Tasks
 @using Blazored.LocalStorage.StorageOptions
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using BootstrapBlazor.Components
+@using Microsoft.Extensions.Options
+
 
 @inject DatabaseService Db
 @inject NavigationManager NavMenu
 @inject ILocalStorageService LocalStorage
 @inject UserState userState
+@inject IModalService ModalService
 <PageTitle>Account</PageTitle>
 <div class="account-container">
     <h1>Account Page</h1>
@@ -41,9 +47,8 @@
             <p>@message</p>
         }
 
-        <button class="btn btn-primary" @onclick="LogoutUser">
-            Logout
-        </button>
+        <button class="btn btn-primary" @onclick="LogoutUser">Logout </button>
+        <button class="btn btn-primary" @onclick="DeleteUser"> Delete Account</button>
     }
 </div>
 @code{
@@ -93,6 +98,14 @@
     }
     private void GoToLogin(){
         NavMenu.NavigateTo("/login");
+    }
+    private async Task DeleteUser(){
+        var modal =  ModalService.Show<DeleteUserModal>("Delete User");
+        var result =await modal.Result;
+        if(!result.Cancelled && result.Data is OptionsModalConjugation.ConjugationOptions options){
+            
+        }
+    }
     }
 }
 }

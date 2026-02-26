@@ -1,0 +1,76 @@
+@inject Blazored.Modal.Services.IModalService ModalService
+@using Blazored.Modal
+@using Microsoft.Extensions.Options
+
+@inject DatabaseService databaseService
+
+<div class="options-modal">
+    <div class="option-group">
+        <label>WARNING: Deleting account</label>
+        <p>This cannot be undone </p>
+    </div>
+
+    <div class="options-buttons">
+        <button class="check-button" @onclick="DeleteUser">Delete</button>
+        <button class="end-button" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+@code 
+{
+    bool UserConfirm = false;
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+   
+    
+    private async Task DeleteUser()
+    {
+       
+    }
+
+    private async Task Cancel() => BlazoredModal.CancelAsync();
+
+    public class ConjugationOptions
+    {
+        public string SelectedList { get; set; }
+    }
+}
+
+<style>
+.options-modal {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    max-width: 400px;
+}
+
+.options-modal h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #37493a;
+}
+
+.option-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.options-select {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.options-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.modal-dialog {
+    position: relative;
+    top: 20vh; 
+}
+
+</style>
