@@ -18,8 +18,11 @@ else{
 }
 
 <button class ="btn btn-primary" @onclick ="GoToLeaderboard"> Leaderboard</button>
-<button class ="btn btn-primary" @onclick ="GoToLoginPage"> Login</button>
-<button class ="btn btn-primary" @onclick ="GoToRegisterPage"> Register</button>
+@if(userState.CurrentUser ==null){
+    <button class ="btn btn-primary" @onclick ="GoToLoginPage"> Login</button>
+    <button class ="btn btn-primary" @onclick ="GoToRegisterPage"> Register</button>
+}
+
 
 </div>
 </div>

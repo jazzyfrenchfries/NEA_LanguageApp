@@ -248,9 +248,9 @@ ExerciseScore DESC;";
         }
         return list;
     }
-    public async Task<bool> ChangePassword(string username, string OldPassword, string newPassword)
+    public async Task<bool> ChangePassword(string username, string oldPassword, string newPassword)
     {
-        var oldHash = HashPassword(OldPassword);
+        var oldHash = HashPassword(oldPassword);
         var newHash = HashPassword(newPassword);
         using var connection = new SqlConnection(_conn);
         await connection.OpenAsync();
@@ -271,14 +271,14 @@ ExerciseScore DESC;";
         return true;
 
     }
-    public async Task DeleteUserAsync(int UserId)
+    public async Task DeleteUserAsync(int userId)
     {
         using var connection = new SqlConnection(_conn);
         await connection.OpenAsync();
         var command = new SqlCommand("DELETE FROM UserScores WHERE UserID = @UserID", connection);
         var command2 = new SqlCommand("DELETE FROM Users WHERE UserID = @UserID", connection);
-        command.Parameters.AddWithValue("@UserId", UserId);
-        command2.Parameters.AddWithValue("@UserId", UserId);
+        command.Parameters.AddWithValue("@UserId", userId);
+        command2.Parameters.AddWithValue("@UserId", userId);
         await command.ExecuteNonQueryAsync();
         await command2.ExecuteNonQueryAsync();
     }

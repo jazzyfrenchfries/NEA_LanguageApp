@@ -8,11 +8,14 @@
 @using Microsoft.Extensions.Options
 @using NEA.Components.Layout
 
+
 @inject DatabaseService Db
 @inject NavigationManager NavMenu
 @inject ILocalStorageService LocalStorage
 @inject IModalService ModalService
 @inject UserState UserState
+@inject Modals.EndGameModal EndGameModal
+@inject Modals.OptionsModalConjugation OptionsModalConjugation
 
 <PageTitle>Conjugation</PageTitle>
 
@@ -223,6 +226,7 @@ else
             ApplyConjugationFilter(options.SelectedList);
         }
     }
+    
 }
 
 <style>
