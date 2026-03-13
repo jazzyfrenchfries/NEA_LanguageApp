@@ -7,4 +7,3 @@
         public string Tense { get; set; }
         public string CorectAnswer { get; set; }
     }
-}
