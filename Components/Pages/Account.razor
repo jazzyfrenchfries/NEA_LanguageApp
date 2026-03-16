@@ -52,12 +52,13 @@
     }
 </div>
 @code{
-     private string newPassword;
-     private string currentPassword;
-     private string currentUser;
+    private string newPassword;
+    private string currentPassword;
+    private string currentUser;
     private string password;
     private string message;
 
+    // changes current user password
     private async Task HandleChangePassword()
     {
         if(string.IsNullOrWhiteSpace(currentPassword) || 
@@ -75,7 +76,8 @@
             ? "Password changed successfully"
             : "Current password is incorrect";
     }
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+    // check whether the user is logged in or not 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
@@ -90,15 +92,17 @@
         StateHasChanged();
     }
 
-
+    // logout the user when button clicked
     private async Task LogoutUser(){
         await LocalStorage.RemoveItemAsync("currentUser");
         userState.ClearUser();
-        NavMenu.NavigateTo("/", forceLoad: true);
+       GoToLogin();
     }
+    // take user to login page
     private void GoToLogin(){
         NavMenu.NavigateTo("/login");
     }
+    // delete the current user when button clicked
     private async Task DeleteUser(){
         var modal =  ModalService.Show<DeleteUserModal>("Delete User");
         var result =await modal.Result;

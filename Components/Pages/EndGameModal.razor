@@ -18,17 +18,19 @@
     [Parameter] public int Score { get; set; }
     
     [CascadingParameter] public BlazoredModalInstance ModalInstance { get; set; } = default!;
-
+    // resets the page to allow complete same exercise
     private async Task Redo()
     {
         await ModalInstance.CloseAsync(); 
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
+    // sends user to home page
     private async Task Home()
     {
         await ModalInstance.CloseAsync(); 
         NavigationManager.NavigateTo("/");
     }
+    // sends user to account page
     private async Task Account()
     {
         await ModalInstance.CloseAsync();

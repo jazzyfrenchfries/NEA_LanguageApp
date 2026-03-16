@@ -47,18 +47,26 @@ else{
 @code{
     private List<User> users = new();
     private string selectedView = "All";
-    protected override async Task OnInitializedAsync(){
+    // gets overall leaderboard info when opening page
+    protected override async Task OnInitializedAsync()
+    {
         users = await Db.GetOverallLeaderboardAsync(20);
     }
-    private async Task ChangeView(string view){
+    // allows the leaderboard type to be changed
+    private async Task ChangeView(string view)
+    {
         selectedView = view;
         await LoadLeaderboard();
     }
-    private async Task LoadLeaderboard(){
-        if(selectedView == "All"){
+    // loads the leaderboard to screen
+    private async Task LoadLeaderboard()
+    {
+        if(selectedView == "All")
+        {
             users = await Db.GetOverallLeaderboardAsync();
         }
-        else{
+        else
+        {
             users = await Db.GetExerciseLeaderboardAsync(selectedView);
         }
     }

@@ -36,26 +36,32 @@
     [Inject] ILocalStorageService storageService { get; set;}
     private RegisterModel registerModel = new RegisterModel();
     private string error;
-    private async Task RegisterUser(){
+    // registers new user and gives feedback
+    private async Task RegisterUser()
+    {
        var username = registerModel.Username.Trim();
        var password = registerModel.Password.Trim();
 
         var success = await Db.RegisterUserAsync(username, password);
-        if(success){
+        if(success)
+        {
             var user = await Db.LoginUserAsync(username,password);
-            if(user != null){
+            if(user != null)
+            {
                 await storageService.SetItemAsync("currentUser", user);
                 NavMenu.NavigateTo("/");
-                }
-            else{
+            }
+            else
+            {
                 error = "Invalid Login";
             
             }
-            }
-        else{
+        }
+        else
+        {
             error = "Registration failed";
         }
-        }
+    }
     private void Cancel(){
         NavMenu.NavigateTo("/");
     }

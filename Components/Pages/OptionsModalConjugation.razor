@@ -28,18 +28,20 @@
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private List<string> conjugationLists = new();
     private List<ConjugationItem> allItems = new List<ConjugationItem>();
-    private string selectedList = "All";
-    
+ private List<ConjugationItem> FilteredQuestionSet =>selectedList == "All" ? allItems: allItems.Where(x=> x.Options == selectedList).ToList();    private string selectedList = "All";
+    // gets all the avaliable options from DB
     protected override async Task OnInitializedAsync(){
         allItems = await databaseService.GetConjugationAsync();
         AddOptionsToList();
     }
+    // sets which list has been selected
     private  void OnParametersSet(){
         conjugationLists.Clear();
         conjugationLists.Add("All");
         AddOptionsToList(); 
         selectedList = conjugationLists.First();
     }
+    // adds a new option to the list
     private void AddOptionsToList(){
         conjugationLists.Clear();
         conjugationLists.Add("All");
@@ -48,9 +50,7 @@
             .Select(x => x.Options)
             .Distinct());
     }
-    private List<ConjugationItem> FilteredQuestionSet =>
-    selectedList == "All"
-    ? allItems: allItems.Where(x=> x.Options == selectedList).ToList();
+   // adds the options to current session
     private async Task ApplyOptions()
     {
         var result = new ConjugationOptions
@@ -62,7 +62,7 @@
     }
 
     private async Task Cancel() => BlazoredModal.CancelAsync();
-
+    // class to hold the selected options
     public class ConjugationOptions
     {
         public string SelectedList { get; set; }

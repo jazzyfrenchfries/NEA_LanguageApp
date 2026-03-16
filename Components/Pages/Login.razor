@@ -30,22 +30,28 @@
     private string error;
     private string username;
     private string password;
-    private async Task LoginUser(){
+    // logs in the user and returns feedback
+    private async Task LoginUser()
+    {
         username = username.Trim();
         password = password.Trim();
         var user = await Db.LoginUserAsync(username,password);
-        if(user != null){
+        if(user != null)
+        {
             await storageService.SetItemAsync("currentUser", user);
             error = "Login Sucessful!";
             userState.SetUser(user);
             await storageService.SetItemAsync("currentUser", user);
             NavMenu.NavigateTo("/");
         }
-        else{
+        else
+        {
             error = "Invalid Login";
         }
     }
-    private void Cancel(){
+    // sends user back
+    private void Cancel()
+    {
         NavMenu.NavigateTo("/");
     }
 }

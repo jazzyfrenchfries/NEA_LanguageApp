@@ -91,7 +91,6 @@ else
 
 @code {
     bool isPlaying = false;
-   
     private User currentUser;
     string userAnswer, hint, showAnswer;
     private int currentKey,totalCompleted, score , currentIndex;
@@ -100,27 +99,25 @@ else
     private List<VocabItem> items = new();
      private List<VocabItem> activeQuestions = new();
     private VocabItem? CurrentItem => activeQuestions.FirstOrDefault(i => i.VocabID == currentKey);
-
-
-protected override async Task OnAfterRenderAsync(bool firstRender)
+    // checks user is logged in 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-
         var user = await storageService.GetItemAsync<User>("currentUser");
         if (user == null)
         {
             NavMenu.NavigateTo("/login");
             return;
         }
-
         userState.SetUser(user);
-
         items = await Db.GetVocabularyAsync();
         ApplyVocabularyFilter("All");
         isLoaded = true;
         StateHasChanged();
     }
-    private void StartVocabulary(){
+    // sets all variables
+    private void StartVocabulary()
+    {
         if(activeQuestions.Count ==0) return;
         var currentQuestion = activeQuestions[Random.Shared.Next(activeQuestions.Count)];
         currentKey = currentQuestion.VocabID;
@@ -135,23 +132,27 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
         showAnswer="";
 
     }
-  private async Task GameOptions()
-{
-    var modal = ModalService.Show<OptionsModalVocab>("Game Options");
-    var result = await modal.Result;
-
-    if(!result.Cancelled && result.Data is OptionsModalVocab.VocabularyOptions options){
+    // opens modal
+    private async Task GameOptions()
+    {
+        var modal = ModalService.Show<OptionsModalVocab>("Game Options");
+        var result = await modal.Result;
+        if(!result.Cancelled && result.Data is OptionsModalVocab.VocabularyOptions options)
+        {
             ApplyVocabularyFilter(options.SelectedList);
         }
-}
-private void ApplyVocabularyFilter(string selectedList){
+    }
+    // applies options from modal
+    private void ApplyVocabularyFilter(string selectedList)
+    {
         activeQuestions = 
         selectedList == "All"
             ? items.ToList()
             :items.Where(x => x.Options == selectedList)
             .ToList();
         currentIndex = 0;
-         if(activeQuestions.Any()){
+         if(activeQuestions.Any())
+         {
             currentKey = activeQuestions[Random.Shared.Next(activeQuestions.Count)].VocabID;
             iscorrect = false;
             hasSubmitted = false;
@@ -162,45 +163,52 @@ private void ApplyVocabularyFilter(string selectedList){
         }
         StateHasChanged();
     }
-    private async Task CheckAnswer(){
+    // checks user answer against DB
+    private async Task CheckAnswer()
+    {
         hasSubmitted = true;
-       if (string.Equals( userAnswer.Trim(), CurrentItem?.Translation?.Trim(),StringComparison.OrdinalIgnoreCase)){
+        if (string.Equals( userAnswer.Trim(), CurrentItem?.Translation?.Trim(),StringComparison.OrdinalIgnoreCase))
+        {
             iscorrect = true;
             int pointsEarned = isHintUsed? 0:1;
             score += pointsEarned;
-             await Db.SaveUserScoreAsync(
+            await Db.SaveUserScoreAsync(
                 userState.CurrentUser!.UserID,
                 "vocabulary",
                 currentKey,
                 1,
                 true
             );
-            
-            }
-            userState.CurrentUser.TotalScore++;
-            await storageService.SetItemAsync("currentUser", userState.CurrentUser);
+        }
+        userState.CurrentUser.TotalScore++;
+        await storageService.SetItemAsync("currentUser", userState.CurrentUser);
     }
-    private async Task ShowAnswer(){
+    // shows answer on screen
+    private async Task ShowAnswer()
+    {
         hasRevealed = true;
         hasSubmitted = true;
         iscorrect = true;
         showAnswer = CurrentItem.Translation;
     }
-    private void NextQuestion(){
+    // moves user to new question
+    private void NextQuestion()
+    {
         StartVocabulary();
     }
 
-     private void EndGame(){
+    // ends game and shows modal 
+    private void EndGame()
+    {
         var parameters = new ModalParameters();
         parameters.Add(nameof(EndGameModal.Score), score);
-
         ModalService.Show<EndGameModal>("Game Over", parameters);
         isPlaying = false;
         score = 0;
     }
-
-   
-    private void UseHint(){
+    // shows user hint
+    private void UseHint()
+    {
         isHintUsed = true;
         hint = CurrentItem?.Hint ?? string.Empty;
     }

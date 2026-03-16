@@ -110,8 +110,8 @@ else
 
     private List<ConjugationItem> items = new();
     private List<ConjugationItem> activeQuestions = new();
-    private ConjugationItem? CurrentItem =>
-        items.FirstOrDefault(i => i.ConjugationID == currentKey);
+    private ConjugationItem? CurrentItem => items.FirstOrDefault(i => i.ConjugationID == currentKey);
+    // check whether user is logged in 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -133,7 +133,7 @@ else
     }
 
 
-
+    // initialise the conjugation variables
     private void StartConjugation()
     {
         if (activeQuestions.Count == 0) return;
@@ -150,17 +150,21 @@ else
         hint = "";
         showAnswer = "";
     }
-     private async Task ShowAnswer(){
+    // set variables and show the correct answer from DB 
+    private async Task ShowAnswer()
+    {
         hasRevealed = true; 
         hasSubmitted = true;
         iscorrect = false;
         showAnswer = CurrentItem.CorectAnswer;
     }
+    // check user answer against DB correct answer
     private async Task CheckAnswer()
     {
         hasSubmitted = true;
 
-        if (string.Equals( userAnswer.Trim(), CurrentItem?.CorectAnswer?.Trim(),StringComparison.OrdinalIgnoreCase)){
+        if (string.Equals( userAnswer.Trim(), CurrentItem?.CorectAnswer?.Trim(),StringComparison.OrdinalIgnoreCase))
+        {
             iscorrect = true;
             int pointsEarned = isHintUsed? 0:1;
             score += pointsEarned;
@@ -170,23 +174,23 @@ else
                 currentKey,
                 1,
                 true);
-            }
-            UserState.CurrentUser.TotalScore++;
-            await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
+        }
+        UserState.CurrentUser.TotalScore++;
+        await LocalStorage.SetItemAsync("currentUser", UserState.CurrentUser);
         
     }
-
+    // resets the parameters for another question 
     private void NextQuestion()
     {
         StartConjugation();
     }
-
+    // shows hint and changes variable 
     private void UseHint()
     {
         isHintUsed = true;
         hint = CurrentItem?.Hint ?? "";
     }
-
+    // ends current game and shows modal with end results 
     private void EndGame()
     {
         var parameters = new ModalParameters
@@ -198,14 +202,17 @@ else
         isPlaying = false;
         score = 0;
     }
-    private void ApplyConjugationFilter(string selectedList){
+    // applies options from modal 
+    private void ApplyConjugationFilter(string selectedList)
+    {
         activeQuestions = 
         selectedList == "All"
             ? items.ToList()
             :items . Where(x => x.Options == selectedList)
             .ToList();
         currentIndex = 0;
-        if(activeQuestions.Any()){
+        if(activeQuestions.Any())
+        {
             currentKey = activeQuestions[Random.Shared.Next(activeQuestions.Count)].ConjugationID;
             iscorrect = false;
             hasSubmitted = false;
@@ -216,7 +223,7 @@ else
         }
         StateHasChanged();
     }
-
+    // opens modal 
     private async Task GameOptions()
     {
         var modal = ModalService.Show<OptionsModalConjugation>("Game Options");

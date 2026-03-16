@@ -28,18 +28,22 @@
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     private List<string> vocabLists = new();
     private List<VocabItem> allItems = new List<VocabItem>();
+    private List<VocabItem> FilteredQuestionSet =>selectedList == "All" ? allItems: allItems.Where( x=> x.Options == selectedList).ToList();
     private string selectedList = "All";
     
+    // gets all the avaliable options from DB
     protected override async Task OnInitializedAsync(){
         allItems = await databaseService. GetVocabularyAsync();
         AddOptionsToList();
     }
+    // sets which lists have been selected
     private  void OnParametersSet(){
         vocabLists.Clear();
         vocabLists.Add("All");
         AddOptionsToList(); 
         selectedList = vocabLists.First();
     }
+    // adds a new option to the list
     private void AddOptionsToList(){
         vocabLists.Clear();
         vocabLists.Add("All");
@@ -49,9 +53,8 @@
             .Distinct());
         selectedList= "All";
     }
-    private List<VocabItem> FilteredQuestionSet =>
-    selectedList == "All"
-    ? allItems: allItems.Where( x=> x.Options == selectedList).ToList();
+    
+    // adds the options to current session
     private async Task ApplyOptions()
     {
         var result = new VocabularyOptions
@@ -61,9 +64,8 @@
 
         await BlazoredModal.CloseAsync(ModalResult.Ok(result));
     }
-
     private async Task Cancel() => BlazoredModal.CancelAsync();
-
+    // class to hold selected options 
     public class VocabularyOptions
     {
         public string SelectedList { get; set; }

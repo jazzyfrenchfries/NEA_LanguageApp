@@ -10,12 +10,12 @@
 @inject UserState userState
 
 <div class="options-modal">
-    <div class="option-group">
-        <label>WARNING: Deleting account</label>
-        <p>This cannot be undone </p>
-    </div>
+    <label>WARNING: Deleting account</label>
+    <p>This cannot be undone </p>
+   
 
     <div class="options-buttons">
+    
         <button class="check-button" @onclick="DeleteUser">Delete</button>
         <button class="end-button" @onclick="Cancel">Cancel</button>
     </div>
@@ -25,10 +25,11 @@
     bool UserConfirm = false;
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
    
-    
+    // deletes current user from DB 
     private async Task DeleteUser()
     {
-       if(userState.CurrentUser == null){
+       if(userState.CurrentUser == null)
+       {
             return;
        }
        await Db.DeleteUserAsync(userState.CurrentUser.UserID);
@@ -45,11 +46,12 @@
 
 <style>
 .options-modal {
-    padding: 1.5rem;
-    background-color: #ffffff;
+    padding: 2rem;
+    background-color: #fdfdfd;
     border-radius: 12px;
     font-family: 'Segoe UI', Roboto, sans-serif;
     max-width: 400px;
+
 }
 
 .options-modal h2 {
@@ -58,13 +60,9 @@
     color: #37493a;
 }
 
-.option-group {
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
 
+
+}
 .options-select {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
@@ -80,6 +78,32 @@
 .modal-dialog {
     position: relative;
     top: 20vh; 
+}
+
+.check-button{
+   font-family: inherit;
+font-weight: 500;
+padding: 0.6rem 1.6rem;
+font-size: 0.95rem;
+border-radius: 999px;
+border: none;
+cursor: pointer;
+background-color: var(--accent-primary);
+color: #ffffff;
+transition: opacity 0.2s ease;
+}
+.end-button{
+     font-family: inherit;
+font-weight: 500;
+padding: 0.6rem 1.6rem;
+font-size: 0.95rem;
+border-radius: 999px;
+border: none;
+cursor: pointer;
+background-color: var(--accent-primary);
+color: #ffffff;
+transition: opacity 0.2s ease;
+
 }
 
 </style>
