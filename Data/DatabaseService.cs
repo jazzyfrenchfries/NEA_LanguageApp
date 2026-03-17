@@ -7,11 +7,11 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Text;
 
-
+//Database class
 public class DatabaseService
 {
     private readonly string _conn;
-
+    // setup database connection
     public DatabaseService(IConfiguration configuration)
     {
         if (configuration == null)
@@ -20,9 +20,9 @@ public class DatabaseService
         }
         _conn = configuration.GetConnectionString("FrenchDb");
         Console.WriteLine("=== Active Connection String");
-        Console.WriteLine(_conn);
     }
 
+    // hash the password for database storage
     public string HashPassword(string password)
     {
         using var sha = SHA256.Create();
@@ -30,6 +30,8 @@ public class DatabaseService
         byte[] hash = sha.ComputeHash(bytes);
         return Convert.ToBase64String(hash);
     }
+
+    // SQL for registering new users
     public async Task<bool> RegisterUserAsync(string username, string password)
     {
         string hashed = HashPassword(password);
@@ -48,6 +50,8 @@ public class DatabaseService
             return false;
         }
     }
+
+    // check user credentials for logging in
     public async Task<User> LoginUserAsync(string username, string password)
     {
         string hashed = HashPassword(password);
@@ -74,6 +78,8 @@ public class DatabaseService
         }
         return null;
     }
+
+    // collect all vocabulary bank from database
     public async Task<List<VocabItem>> GetVocabularyAsync()
     {
         var list = new List<VocabItem>();
@@ -96,9 +102,10 @@ public class DatabaseService
                 });
             }
         }
-
         return list;
     }
+
+    // get all conjugation bank from database
     public async Task<List<ConjugationItem>> GetConjugationAsync()
     {
         var list = new List<ConjugationItem>();
@@ -123,10 +130,9 @@ public class DatabaseService
 
             });
         }
-
-
         return list;
     }
+    // get all listening bank from database
     public async Task<List<ListeningItem>> GetListeningAsync()
     {
         var list = new List<ListeningItem>();
@@ -150,12 +156,10 @@ public class DatabaseService
 
             });
         }
-
-
         return list;
     }
 
-
+    // get all users with specific username
     public async Task<User> GetUserByUsernameAsync(string username)
     {
         using var conn = new SqlConnection(_conn);
@@ -175,7 +179,7 @@ public class DatabaseService
         }
         return null;
     }
-
+    // save the current session score to current user 
     public async Task SaveUserScoreAsync(int userId, string exerciseType, int exerciseId, int score, bool correct)
     {
         using var conn = new SqlConnection(_conn);
@@ -194,7 +198,7 @@ public class DatabaseService
         await conn.OpenAsync();
         await cmd.ExecuteNonQueryAsync();
     }
-
+    // collect all the users for leaderboard
     public async Task<List<User>> GetOverallLeaderboardAsync(int topN = 20)
     {
         var list = new List<User>();
@@ -215,26 +219,19 @@ public class DatabaseService
         }
         return list;
     }
+    // get all users for leaderboard of specific exercise
     public async Task<List<User>> GetExerciseLeaderboardAsync(string ExerciseID)
     {
         var list = new List<User>();
         using var conn = new SqlConnection(_conn);
         using var cmd = conn.CreateCommand();
         cmd.Parameters.AddWithValue("@ID", ExerciseID);
-        cmd.CommandText = @"SELECT 
-u.UserID,
-u.Username,
-SUM(S.Score) As ExerciseScore
-FROM UserScores s
-INNER JOIN Users u on u.UserID = s.UserID
-WHERE s.ExerciseType = @ID
-GROUP BY
-u.UserID,
-u.Username
-ORDER BY
-ExerciseScore DESC;";
-
-
+        cmd.CommandText = @"SELECT u.UserID,u.Username,SUM(S.Score) As ExerciseScore
+            FROM UserScores s
+            INNER JOIN Users u on u.UserID = s.UserID
+            WHERE s.ExerciseType = @ID
+            GROUP BY u.UserID, u.Username
+            ORDER BY ExerciseScore DESC;";
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -248,6 +245,7 @@ ExerciseScore DESC;";
         }
         return list;
     }
+    // change the password in database of current user
     public async Task<bool> ChangePassword(string username, string oldPassword, string newPassword)
     {
         var oldHash = HashPassword(oldPassword);
@@ -271,6 +269,7 @@ ExerciseScore DESC;";
         return true;
 
     }
+    // delete current user form all database
     public async Task DeleteUserAsync(int userId)
     {
         using var connection = new SqlConnection(_conn);
@@ -282,5 +281,4 @@ ExerciseScore DESC;";
         await command.ExecuteNonQueryAsync();
         await command2.ExecuteNonQueryAsync();
     }
-
 }

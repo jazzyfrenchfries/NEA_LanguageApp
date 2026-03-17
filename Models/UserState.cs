@@ -1,6 +1,8 @@
+// class for checking current user 
 public class UserState()
 {
-    public User CurrentUser{ get; private set; }
+
+    public User CurrentUser { get; private set; }
     public bool IsLoggedIn => CurrentUser != null;
     public void SetUser(User user)
     {

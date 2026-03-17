@@ -1,5 +1,4 @@
-
-    
+// base class for all exercises
 public abstract class ExerciseItem
 {
     public string Hint { get; set; }
