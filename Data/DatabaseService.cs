@@ -6,6 +6,7 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Text;
+using System.Data.Common;
 
 //Database class
 public class DatabaseService
@@ -64,16 +65,18 @@ public class DatabaseService
         using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
-            var storedHash = reader.GetString(2);
-            if (storedHash == hashed)
+            if(GetUserByUsernameAsync(username)!= null)
             {
-                return new User
+                var storedHash = reader.GetString(2);
+                if (storedHash == hashed)
                 {
-                    UserID = reader.GetInt32(0),
-                    Username = reader.GetString(1),
-                    TotalScore = reader.GetInt32(3)
-                };
-
+                    return new User
+                    {
+                        UserID = reader.GetInt32(0),
+                        Username = reader.GetString(1),
+                        TotalScore = reader.GetInt32(3)
+                    };
+                }
             }
         }
         return null;

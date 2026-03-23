@@ -22,6 +22,7 @@
 <div class="register-input">
 <InputText @bind-Value="registerModel.Password" type="password" placeholder="Password"/>
 <ValidationMessage For="@(()=> registerModel.Password)" />
+<p>@error</p>
 </div>
 
 <div class="register-buttons">
@@ -53,7 +54,7 @@
             }
             else
             {
-                error = "Invalid Login";
+                error = "Invalid username or password";
             
             }
         }
