@@ -1,0 +1,96 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ConjugationBank](
+	[ConjugationID] [int] IDENTITY(1,1) NOT NULL,
+	[Verb] [nvarchar](100) NOT NULL,
+	[Pronoun] [nvarchar](50) NOT NULL,
+	[Tense] [nvarchar](50) NOT NULL,
+	[CorrectAnswer] [nvarchar](200) NOT NULL,
+	[Hint] [nvarchar](200) NULL,
+	[Options] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ConjugationID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ListeningBank](
+	[ListeningID] [int] IDENTITY(1,1) NOT NULL,
+	[AudioPath] [nvarchar](300) NOT NULL,
+	[CorrectAnswer] [nvarchar](200) NOT NULL,
+	[FullText] [nvarchar](max) NOT NULL,
+	[Hint] [nvarchar](255) NULL,
+	[Options] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ListeningID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Users](
+	[UserID] [int] IDENTITY(1,1) NOT NULL,
+	[Username] [nvarchar](50) NOT NULL,
+	[Email] [nvarchar](100) NULL,
+	[PasswordHash] [nvarchar](200) NOT NULL,
+	[TotalScore] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[UserID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[Username] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Users] ADD  DEFAULT ((0)) FOR [TotalScore]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserScores](
+	[ScoreID] [int] IDENTITY(1,1) NOT NULL,
+	[UserID] [int] NOT NULL,
+	[ExerciseType] [nvarchar](20) NOT NULL,
+	[ExerciseID] [int] NOT NULL,
+	[Score] [int] NOT NULL,
+	[Correct] [bit] NOT NULL,
+	[DateCompletedLast] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ScoreID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[UserScores] ADD  DEFAULT (sysutcdatetime()) FOR [DateCompletedLast]
+GO
+ALTER TABLE [dbo].[UserScores]  WITH CHECK ADD FOREIGN KEY([UserID])
+REFERENCES [dbo].[Users] ([UserID])
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[VocabularyBank](
+	[VocabID] [int] IDENTITY(1,1) NOT NULL,
+	[FrenchWord] [nvarchar](100) NOT NULL,
+	[Translation] [nvarchar](100) NOT NULL,
+	[Hint] [nvarchar](200) NULL,
+	[Options] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[VocabID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
