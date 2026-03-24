@@ -1,3 +1,7 @@
+--NEA Database Script
+-- This code creates all the SQL tables required for this project
+-- Can be executed in SQL Server 
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -109,6 +113,7 @@ VALUES
 ('aller', 'je', 'Perfect', 'suis allé', 'uses être', 'perfect tense verbs'),
 ('aller', 'elle', 'Perfect', 'est allée', 'agreement', 'perfect tense verbs'),
 ('faire', 'j’', 'Perfect', 'ai fait', 'avoir verb', 'perfect tense verbs');
+GO 
 
 INSERT INTO VocabularyBank (FrenchWord, Translation, Hint, Options)
 VALUES
@@ -124,6 +129,7 @@ VALUES
 ('le poisson', 'fish', 'seafood', 'Food'),
 ('les légumes', 'vegetables', 'plural noun', 'Food'),
 ('l’école', 'school', 'feminine noun', 'School');
+GO
 
 INSERT INTO ListeningBank (AudioPath, CorrectAnswer, FullText, Hint, Options)
 VALUES
@@ -134,6 +140,7 @@ VALUES
 ('audio/listening5.mp3', 'lorsque', 'Nous parlons français _______ nous sommes dehors, à l''école ou au marché.', 'another word for quand', 'Basic'),
 ('audio/listening6.mp3', 'se retrouver', 'La majorité des Français fête Pâques et considère cette date comme une occasion de __ _________ en famille pour partager un bon repas.', 'reflexive verb', 'Medium'),
 ('audio/listening7.mp3', 'endroit', 'Le centre commercial est l''_____ idéal pour passer un bon moment avec sa famille, ses amis ou ses collègues de travail.', 'space', 'Medium');
+GO 
 
 INSERT INTO Users (Username, Email, PasswordHash, TotalScore)
 VALUES
@@ -142,6 +149,7 @@ VALUES
 ('testuser3', NULL, '88d2ndRdUcvTOiEFEkJ0t137Q+zAKNiZwjE6Ty8Plc4=', 4),
 ('testuser5', NULL, '6SYQohWcmZx8XyxGrcw6lvsqiqSh7g3Xyh1K2SUBCc0=', 0),
 ('testuser4', NULL, 'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=', 9);
+GO
 
 INSERT INTO UserScores (UserID, ExerciseType, ExerciseID, Score, Correct, DateCompletedLast)
 VALUES
@@ -150,3 +158,4 @@ VALUES
 (1, 'Listening', 1, 1, 1, '2025-12-12 12:38:55'),
 (1, 'Listening', 1, 1, 1, '2025-12-15 14:44:08'),
 (1, 'Listening', 1, 1, 1, '2025-12-19 11:59:56');
+GO
