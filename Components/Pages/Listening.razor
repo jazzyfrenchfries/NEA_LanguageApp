@@ -47,7 +47,7 @@ else
         {
             <p>@CurrentItem.FullText</p>
 
-            <audio controls>
+            <audio controls @key="currentKey">
                 <source src="@CurrentItem.AudioPath" type="audio/mpeg" />
                 Your browser does not support the audio element.
             </audio>
